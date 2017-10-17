@@ -1,0 +1,7 @@
+#temp store
+*.pth
+
+#image files
+*.png
+*.jpg
+
