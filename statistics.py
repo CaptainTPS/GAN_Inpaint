@@ -13,13 +13,14 @@ class feature_item:
 
 # calculate distance
 def distEclud(vecA, vecB):
-    return sqrt(sum(power(vecA.feature - vecB.feature, 2)))
+    return sqrt(sum(power(vecA - vecB, 2)))
 
 # generate centers
 def randCent(dataSet, k):
     n = shape(dataSet)[1]
     centroids = mat(zeros((k, n)))
     for j in range(n):
+        # temp = dataSet[:, j]
         minJ = min(dataSet[:, j])
         rangeJ = float(max(array(dataSet)[:, j]) - minJ)
         centroids[:, j] = minJ + rangeJ * random.rand(k, 1)
@@ -51,7 +52,19 @@ def runkMeans(dataSet, k, distMeas=distEclud, createCent=randCent):
             centroids[cent, :] = mean(ptsInClust, axis=0)  # assign centroid to mean
     return centroids, clusterAssment
 
-def showResult():
+def showResult(centers, clusterAssment, items):
+    import matplotlib.pyplot as plt
+
+    k = len(centers)
+    for i in range(k):
+        arr = [items[int(x.A)].id for x in clusterAssment[:, 0] if int(x.A) == i]
+
+        plt.hist(arr)
+        plt.title("Cluster "+str(i)+" Histogram")
+        plt.xlabel("Feature id")
+        plt.ylabel("Frequency")
+        plt.show()
+
     pass
 
 def kmeans():
@@ -67,8 +80,10 @@ def kmeans():
     file.close()
 
     #running kmeans algorithm
+    dataset = mat([x.feature for x in items])
+    centers, clusterAssment = runkMeans(dataset, 3)
 
-
+    showResult(centers, clusterAssment, items)
     # print(data)
     pass
 
