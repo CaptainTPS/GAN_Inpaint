@@ -4,4 +4,6 @@
 #image files
 *.png
 *.jpg
-/feature1.data
+
+#input & output
+*.data
