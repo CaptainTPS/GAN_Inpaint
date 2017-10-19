@@ -46,9 +46,9 @@ def inpaint(real, pred):
                     opt.overlapPred: opt.fineSize / 2 - opt.overlapPred,
                     opt.overlapPred: opt.fineSize / 2 - opt.overlapPred])
 
-class localModel(nn.module):
+class localModel(nn.Module):
     def __init__(self, ngpu, noiseGen, fineSize, nc, nef, nBottleneck, nz, ngf):
-        super(_netG, self).__init__()
+        super(localModel, self).__init__()
         self.ngpu = ngpu
         self.noiseGen = noiseGen
         self.fineSize = fineSize
@@ -143,15 +143,15 @@ class localModel(nn.module):
 
 def HalfNettoFeature(predict, dataloader, noise, opt):
 
-    model = localModel
-    model_dict = localModel.state_dict()
+    model = localModel(ngpu, opt.noiseGen, opt.fineSize, opt.nc, opt.nef, opt.nBottleneck, opt.nz, opt.ngf)
+    model_dict = model.state_dict()
 
     # new_dict = {k: v for k, v in predict.items() if k in model_dict}
     new_dict = dict([])
     for k, v in predict.items():
         if k in model_dict:
             new_dict[k] = v
-            print("ok")
+            # print("ok")
 
     model_dict.update(new_dict)
     model.load_state_dict(model_dict)
@@ -162,6 +162,10 @@ def HalfNettoFeature(predict, dataloader, noise, opt):
         if opt.noiseGen:
             noise = noise.cuda()
 
+    id = 1
+    filename = "feature" + str(id) + ".data"
+    file = open(filename, "w")
+
     for i, data in enumerate(dataloader, 0):
         real_cpu, _ = data
         if opt.gpu:
@@ -169,23 +173,26 @@ def HalfNettoFeature(predict, dataloader, noise, opt):
         initData(real_cpu)
 
         if opt.noiseGen:
-            features = netG({Variable(real_cpu), Variable(noise)})
+            features = model({Variable(real_cpu), Variable(noise)})
         else:
-            features = netG(Variable(real_cpu))
+            features = model(Variable(real_cpu))
 
-    #write to file
-    filename = "feature1.txt"
-    if 1:
-        file = open(filename, "w")
-        cnt = len(features)
-        cperf =len(features[0])
-        for i in cnt:
-            for j in cperf:
-                file.write(str(features[i][j][0][0]) + " ")
-            file.write('\n')
-        file.close()
-        #print(features[0])
+        #write to file
+        if 1:
+            features = features.cpu().data
+            cnt = len(features)
+            cperf =len(features[0])
+            tttt = features[0][0][0][0]
+            for i in range(cnt):
+                for j in range(cperf):
+                    file.write(str(features[i][j][0][0]) + " ")
+                file.write('\n')
+                print(i)
+            #print(features[0])
 
+        if i >=2:
+            break
+    file.close()
 
 
 # here is the running part
@@ -204,7 +211,7 @@ if __name__ == "__main__":
     cudnn.benchmark = True
 
     ## load data
-    testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/testFolder'
+    testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_train'
     inputSize = opt.fineSize
     dataset = dset.ImageFolder(root=testroot,
                                transform=transforms.Compose([
@@ -228,6 +235,7 @@ if __name__ == "__main__":
     fake_label = 0
 
     ## initialize variables
+    noise = []
     if opt.noiseGen:
         noise = torch.FloatTensor(opt.batchSize, opt.nz, 1, 1)
         if opt.noisetype == 'uniform':

@@ -56,7 +56,7 @@ def showResult():
 
 def kmeans():
     id = 1
-    filename = "feature"+str(id)+".txt"
+    filename = "feature"+str(id)+".data"
     file = open(filename)
     buffer = file.readlines()
     buffer = [x.split(' ') for x in buffer]
@@ -64,6 +64,7 @@ def kmeans():
     items = []
     for i in buffer:
         items.append(feature_item(id, i))
+    file.close()
 
     #running kmeans algorithm
 
