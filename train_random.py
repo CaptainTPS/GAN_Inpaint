@@ -335,13 +335,13 @@ if __name__ == "__main__":
             # torch.save(netG, 'checkpoints/' + opt.name + '_' + str(epoch) + '_netG.whole')
             # torch.save(netD, 'checkpoints/' + opt.name + '_' + str(epoch) + '_netD.whole')
 
-        if epoch > 30:
+        if epoch > 11:
             break
 
     endT = time.localtime()
 
-    print('begin: %dh:%dm:%ds' % (beginT.tm_hour, beginT.tm_min, beginT.tm_sec))
-    print('end: %dh:%dm:%ds' % (endT.tm_hour, endT.tm_min, endT.tm_sec))
+    print('begin: %d: %d: %d' % (beginT.tm_hour, beginT.tm_min, beginT.tm_sec))
+    print('end: %d: %d: %d' % (endT.tm_hour, endT.tm_min, endT.tm_sec))
 
 
 

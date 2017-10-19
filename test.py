@@ -173,7 +173,18 @@ def HalfNettoFeature(predict, dataloader, noise, opt):
         else:
             features = netG(Variable(real_cpu))
 
-    
+    #write to file
+    filename = "feature1.txt"
+    if 1:
+        file = open(filename, "w")
+        cnt = len(features)
+        cperf =len(features[0])
+        for i in cnt:
+            for j in cperf:
+                file.write(str(features[i][j][0][0]) + " ")
+            file.write('\n')
+        file.close()
+        #print(features[0])
 
 
 
