@@ -4,6 +4,8 @@
     <list default="true" id="17609f51-6c3c-4cd4-8174-f6ebd217ea70" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/statistics.py" afterPath="$PROJECT_DIR$/statistics.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test.py" afterPath="$PROJECT_DIR$/test.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/train_random.py" afterPath="$PROJECT_DIR$/train_random.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -35,11 +37,11 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="train_random.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="train_random.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/train_random.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="300">
-                  <caret line="211" column="63" lean-forward="false" selection-start-line="211" selection-start-column="63" selection-end-line="211" selection-end-column="63" />
+                <state relative-caret-position="220">
+                  <caret line="281" column="0" lean-forward="true" selection-start-line="281" selection-start-column="0" selection-end-line="281" selection-end-column="0" />
                   <folding>
                     <element signature="e#615#870#0" expanded="false" />
                     <element signature="e#913#1561#0" expanded="false" />
@@ -51,11 +53,11 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="random_test.py" pinned="false" current-in-tab="true">
+          <file leaf-file-name="random_test.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/random_test.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="20">
-                  <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+                <state relative-caret-position="280">
+                  <caret line="14" column="23" lean-forward="false" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
                   <folding>
                     <element signature="e#537#1062#0" expanded="false" />
                     <element signature="e#1095#2089#0" expanded="false" />
@@ -75,9 +77,10 @@
                   <folding>
                     <element signature="e#439#1399#0" expanded="false" />
                     <element signature="e#1430#1820#0" expanded="false" />
-                    <marker date="1508383752321" expanded="true" signature="6366:7316" ph="..." />
-                    <marker date="1508383752321" expanded="true" signature="6367:6793" ph="..." />
-                    <marker date="1508383752321" expanded="true" signature="7046:7316" ph="..." />
+                    <marker date="1509426529589" expanded="true" signature="6370:7322" ph="..." />
+                    <marker date="1509426529589" expanded="true" signature="6371:6797" ph="..." />
+                    <marker date="1509426529589" expanded="true" signature="6837:6916" ph="..." />
+                    <marker date="1509426529589" expanded="true" signature="7052:7322" ph="..." />
                   </folding>
                 </state>
               </provider>
@@ -90,12 +93,12 @@
           <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/test.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="962">
-                  <caret line="233" column="18" lean-forward="false" selection-start-line="233" selection-start-column="18" selection-end-line="233" selection-end-column="18" />
+                <state relative-caret-position="142">
+                  <caret line="220" column="24" lean-forward="false" selection-start-line="220" selection-start-column="24" selection-end-line="220" selection-end-column="24" />
                   <folding>
                     <element signature="e#439#1399#0" expanded="false" />
                     <element signature="e#1430#1820#0" expanded="false" />
-                    <marker date="1508383752321" expanded="true" signature="6367:6793" ph="..." />
+                    <marker date="1509426529589" expanded="true" signature="6371:6797" ph="..." />
                   </folding>
                 </state>
               </provider>
@@ -104,8 +107,8 @@
           <file leaf-file-name="statistics.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/statistics.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="252">
-                  <caret line="54" column="47" lean-forward="true" selection-start-line="54" selection-start-column="47" selection-end-line="54" selection-end-column="47" />
+                <state relative-caret-position="412">
+                  <caret line="107" column="51" lean-forward="true" selection-start-line="107" selection-start-column="51" selection-end-line="107" selection-end-column="51" />
                   <folding />
                 </state>
               </provider>
@@ -367,7 +370,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="ContextEncoder" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_random.py" />
-      <option name="PARAMETERS" value="--dataroot $PROJECT_DIR$/dataset/dining_room/d_train --name inpaintCenter --overlapPred 4 --wtl2 0.999 --nBottleneck 4000 --niter 500 --loadSize 350 --fineSize 128 --gpu 1" />
+      <option name="PARAMETERS" value="--dataroot $PROJECT_DIR$/dataset/clustermix/train --name inpaintCenter --overlapPred 4 --wtl2 0.999 --nBottleneck 4000 --niter 500 --loadSize 350 --fineSize 128 --gpu 1" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <method />
@@ -382,8 +385,8 @@
     <recent_temporary>
       <list size="4">
         <item index="0" class="java.lang.String" itemvalue="Python.statistics" />
-        <item index="1" class="java.lang.String" itemvalue="Python.random_test" />
-        <item index="2" class="java.lang.String" itemvalue="Python.test" />
+        <item index="1" class="java.lang.String" itemvalue="Python.test" />
+        <item index="2" class="java.lang.String" itemvalue="Python.random_test" />
         <item index="3" class="java.lang.String" itemvalue="Python.demo" />
       </list>
     </recent_temporary>
@@ -453,7 +456,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/test.py</url>
-          <line>261</line>
+          <line>264</line>
           <option name="timeStamp" value="88" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -462,8 +465,48 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/test.py</url>
-          <line>251</line>
+          <line>254</line>
           <option name="timeStamp" value="103" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/statistics.py</url>
+          <line>40</line>
+          <option name="timeStamp" value="142" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/statistics.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="143" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/statistics.py</url>
+          <line>57</line>
+          <option name="timeStamp" value="144" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/statistics.py</url>
+          <line>107</line>
+          <option name="timeStamp" value="145" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/statistics.py</url>
+          <line>34</line>
+          <option name="timeStamp" value="148" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/statistics.py</url>
+          <line>31</line>
+          <option name="timeStamp" value="149" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/statistics.py</url>
+          <line>30</line>
+          <option name="timeStamp" value="150" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/statistics.py</url>
+          <line>33</line>
+          <option name="timeStamp" value="151" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -473,18 +516,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="122" />
+      <option name="time" value="152" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file:///usr/local/lib/python2.7/dist-packages/torch/nn/functional.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="630">
-          <caret line="39" column="0" lean-forward="false" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2106">
@@ -492,7 +528,10 @@
           <folding>
             <element signature="e#439#1399#0" expanded="false" />
             <element signature="e#1430#1820#0" expanded="false" />
-            <marker date="1508383752321" expanded="true" signature="6367:6793" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="6370:7322" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="6371:6797" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="6837:6916" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="7052:7322" ph="..." />
           </folding>
         </state>
       </provider>
@@ -554,7 +593,10 @@
           <folding>
             <element signature="e#439#1399#0" expanded="false" />
             <element signature="e#1430#1820#0" expanded="false" />
-            <marker date="1508383752321" expanded="true" signature="6367:6793" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="6370:7322" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="6371:6797" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="6837:6916" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="7052:7322" ph="..." />
           </folding>
         </state>
       </provider>
@@ -855,18 +897,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="962">
-          <caret line="233" column="18" lean-forward="false" selection-start-line="233" selection-start-column="18" selection-end-line="233" selection-end-column="18" />
-          <folding>
-            <element signature="e#439#1399#0" expanded="false" />
-            <element signature="e#1430#1820#0" expanded="false" />
-            <marker date="1508383752321" expanded="true" signature="6367:6793" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharmCE2017.1/system/python_stubs/-1247972723/numpy/core/multiarray.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="571">
@@ -875,24 +905,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/train_random.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="211" column="63" lean-forward="false" selection-start-line="211" selection-start-column="63" selection-end-line="211" selection-end-column="63" />
-          <folding>
-            <element signature="e#615#870#0" expanded="false" />
-            <element signature="e#913#1561#0" expanded="false" />
-            <element signature="e#1595#2684#0" expanded="false" />
-            <element signature="e#2742#3809#0" expanded="false" />
-            <element signature="e#3869#5165#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/random_test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20">
-          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+        <state relative-caret-position="280">
+          <caret line="14" column="23" lean-forward="false" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
           <folding>
             <element signature="e#537#1062#0" expanded="false" />
             <element signature="e#1095#2089#0" expanded="false" />
@@ -903,11 +919,48 @@
         </state>
       </provider>
     </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/numpy/matrixlib/defmatrix.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="1209" column="0" lean-forward="false" selection-start-line="1209" selection-start-column="0" selection-end-line="1209" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2660">
+          <caret line="195" column="0" lean-forward="false" selection-start-line="195" selection-start-column="0" selection-end-line="195" selection-end-column="0" />
+          <folding>
+            <element signature="e#439#1399#0" expanded="false" />
+            <element signature="e#1430#1820#0" expanded="false" />
+            <marker date="1509426529589" expanded="true" signature="6370:7322" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="6371:6797" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="6837:6916" ph="..." />
+            <marker date="1509426529589" expanded="true" signature="7052:7322" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/statistics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="54" column="47" lean-forward="true" selection-start-line="54" selection-start-column="47" selection-end-line="54" selection-end-column="47" />
+        <state relative-caret-position="412">
+          <caret line="107" column="51" lean-forward="true" selection-start-line="107" selection-start-column="51" selection-end-line="107" selection-end-column="51" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/train_random.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="281" column="0" lean-forward="true" selection-start-line="281" selection-start-column="0" selection-end-line="281" selection-end-column="0" />
+          <folding>
+            <element signature="e#615#870#0" expanded="false" />
+            <element signature="e#913#1561#0" expanded="false" />
+            <element signature="e#1595#2684#0" expanded="false" />
+            <element signature="e#2742#3809#0" expanded="false" />
+            <element signature="e#3869#5165#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>

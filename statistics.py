@@ -33,7 +33,17 @@ def runkMeans(dataSet, k, distMeas=distEclud, createCent=randCent):
     # to a centroid, also holds SE of each point
     centroids = createCent(dataSet, k)
     clusterChanged = True
+
+    maxiter = 10000
+    i = 0
     while clusterChanged:
+
+        if i > maxiter:
+            break
+
+        if i%1000 == 0:
+            print("iter to " + str(i))
+
         clusterChanged = False
         for i in range(m):  # for each data point assign it to the closest centroid
             minDist = inf
@@ -56,28 +66,42 @@ def showResult(centers, clusterAssment, items):
     import matplotlib.pyplot as plt
 
     k = len(centers)
+
     for i in range(k):
-        arr = [items[int(x.A)].id for x in clusterAssment[:, 0] if int(x.A) == i]
+        arr = []
+        # arr = [items[ii].id for ii, x in clusterAssment[:, 0] if int(x.A) == i]
+
+        clen = len(clusterAssment[:, 0])
+
+        for ii in range(clen):
+            x = clusterAssment[:, 0][ii]
+            if int(x.A) == i:
+                arr.append(items[ii].id)
 
         plt.hist(arr)
         plt.title("Cluster "+str(i)+" Histogram")
         plt.xlabel("Feature id")
         plt.ylabel("Frequency")
-        plt.show()
+        # plt.show()
+        plt.savefig("Cluster"+str(i)+".png")
+        plt.close()
 
     pass
 
 def kmeans():
-    id = 1
-    filename = "feature"+str(id)+".data"
-    file = open(filename)
-    buffer = file.readlines()
-    buffer = [x.split(' ') for x in buffer]
-    buffer = [[float(x) for x in line if x != '\n'] for line in buffer]
     items = []
-    for i in buffer:
-        items.append(feature_item(id, i))
-    file.close()
+    id = 3
+    for idi in range(id):
+        filename = "feature"+str(idi)+".data"
+        # filename = "/home/cad/PycharmProjects/ContextEncoder/testdata/f" + str(idi) + ".txt"
+        file = open(filename)
+        buffer = file.readlines()
+        buffer = [x.split(' ') for x in buffer]
+        buffer = [[float(x) for x in line if x != '\n'] for line in buffer]
+
+        for i in buffer:
+            items.append(feature_item(idi, i))
+        file.close()
 
     #running kmeans algorithm
     dataset = mat([x.feature for x in items])

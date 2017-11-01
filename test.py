@@ -141,7 +141,7 @@ class localModel(nn.Module):
         '''
         return output
 
-def HalfNettoFeature(predict, dataloader, noise, opt):
+def HalfNettoFeature(predict, dataloader, noise, opt, id):
 
     model = localModel(ngpu, opt.noiseGen, opt.fineSize, opt.nc, opt.nef, opt.nBottleneck, opt.nz, opt.ngf)
     model_dict = model.state_dict()
@@ -162,7 +162,7 @@ def HalfNettoFeature(predict, dataloader, noise, opt):
         if opt.noiseGen:
             noise = noise.cuda()
 
-    id = 1
+    # id = 1
     filename = "feature" + str(id) + ".data"
     file = open(filename, "w")
 
@@ -183,15 +183,15 @@ def HalfNettoFeature(predict, dataloader, noise, opt):
             cnt = len(features)
             cperf =len(features[0])
             tttt = features[0][0][0][0]
-            for i in range(cnt):
+            for ii in range(cnt):
                 for j in range(cperf):
-                    file.write(str(features[i][j][0][0]) + " ")
+                    file.write(str(features[ii][j][0][0]) + " ")
                 file.write('\n')
-                print(i)
-            #print(features[0])
 
-        if i >=2:
-            break
+            #print(features[0])
+        print("cal to feature "+str(i * 64 + 64))
+        # if i >=2:
+        #     break
     file.close()
 
 
@@ -211,7 +211,8 @@ if __name__ == "__main__":
     cudnn.benchmark = True
 
     ## load data
-    testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_train'
+    id = 2
+    testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/clustermix/train/' + str(id)
     inputSize = opt.fineSize
     dataset = dset.ImageFolder(root=testroot,
                                transform=transforms.Compose([
@@ -243,11 +244,13 @@ if __name__ == "__main__":
         elif opt.noisetype == 'normal':
             noise.normal(0, 1)
 
-    netGroot = '/home/cad/PycharmProjects/ContextEncoder/checkpoints/random_inpaintCenter_10_netG.pth'
+    netGroot = '/home/cad/PycharmProjects/ContextEncoder/checkpoints/random_inpaintCenter_30_netG.pth'
     netG = _netG(ngpu, opt.noiseGen, opt.fineSize, nc, nef, nBottleneck, nz, ngf)
     trained_dict = torch.load(netGroot)
 
-    HalfNettoFeature(trained_dict, dataloader, noise, opt)
+    HalfNettoFeature(trained_dict, dataloader, noise, opt, id)
+
+    exit()
 
     netG.load_state_dict(trained_dict)
 
