@@ -144,8 +144,12 @@ if __name__ == "__main__":
     cudnn.benchmark = True
 
     ## load data
-    # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/conference/test'
-    testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_val'
+
+    # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_val'
+    # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/conference/val'
+    testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_test'
+    # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/DIYtest'
+    # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/lsunTest'
     inputSize = opt.fineSize
     dataset = dset.ImageFolder(root=testroot,
                                    transform=transforms.Compose([
@@ -155,7 +159,7 @@ if __name__ == "__main__":
                                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                                    ]))
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
-                                             shuffle=True, num_workers=int(opt.workers), drop_last=True)
+                                             shuffle=False, num_workers=int(opt.workers), drop_last=True)
 
     ## load net
     ngpu = opt.gpu

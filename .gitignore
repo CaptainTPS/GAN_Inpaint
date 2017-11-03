@@ -4,6 +4,8 @@
 #image files
 *.png
 *.jpg
+*.jpeg
+*.xml
 
 #input & output
 *.data

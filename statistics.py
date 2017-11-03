@@ -26,8 +26,22 @@ def randCent(dataSet, k):
         centroids[:, j] = minJ + rangeJ * random.rand(k, 1)
     return centroids
 
+def randPick(dataSet, k):
+    n = shape(dataSet)[1]
+    ran = shape(dataSet)[0]
+    centroids = mat(zeros((k, n)))
+    seed = []
+    for j in range(k):
+        s = random.randint(0, ran - len(seed))
+        for m in seed:
+            if(s >= m):
+                s += 1
+        seed.append(s)
+        centroids[j] = dataSet[s, :]
+    return centroids
 
-def runkMeans(dataSet, k, distMeas=distEclud, createCent=randCent):
+
+def runkMeans(dataSet, k, distMeas=distEclud, createCent=randPick):
     m = shape(dataSet)[0]
     clusterAssment = mat(zeros((m, 2)))  # create mat to assign data points
     # to a centroid, also holds SE of each point
@@ -43,6 +57,7 @@ def runkMeans(dataSet, k, distMeas=distEclud, createCent=randCent):
 
         if i%1000 == 0:
             print("iter to " + str(i))
+            print centroids
 
         clusterChanged = False
         for i in range(m):  # for each data point assign it to the closest centroid
@@ -51,12 +66,12 @@ def runkMeans(dataSet, k, distMeas=distEclud, createCent=randCent):
             for j in range(k):
                 distJI = distMeas(centroids[j, :], dataSet[i, :])
                 if distJI < minDist:
-                    minDist = distJI;
+                    minDist = distJI
                     minIndex = j
             if clusterAssment[i, 0] != minIndex:
                 clusterChanged = True
             clusterAssment[i, :] = minIndex, minDist ** 2
-        print centroids
+
         for cent in range(k):  # recalculate centroids
             ptsInClust = dataSet[nonzero(clusterAssment[:, 0].A == cent)[0]]  # get all the point in this cluster
             centroids[cent, :] = mean(ptsInClust, axis=0)  # assign centroid to mean
@@ -105,7 +120,7 @@ def kmeans():
 
     #running kmeans algorithm
     dataset = mat([x.feature for x in items])
-    centers, clusterAssment = runkMeans(dataset, 3)
+    centers, clusterAssment = runkMeans(dataset, 10)
 
     showResult(centers, clusterAssment, items)
     # print(data)

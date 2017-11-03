@@ -128,10 +128,42 @@ class _netG(nn.Module):
             y = torch.cat(y, 0) # original is nn.JoinTable(2)
             output = self.midNet(y)
         else:
+            # i = 0
+            # for module in self.encodeNet:
+            #     i+=1
+            #     if i == 5:
+            #         f = open("input_same.txt", 'w')
+            #         d = input.data.cpu()
+            #         print(d.size())
+            #         for i in range(64):
+            #             for j in range(32):
+            #                 for k in range(32):
+            #                     f.write(str(d[0][i][j][k]) + " ")
+            #         f.close()
+            #         print(input.size())
+            #     input = module(input)
+            #     if i == 4:
+            #         print(input.size())
+            #         print(input.data[0][0][0][0])
+
+
+            #batchNormal when test need to change affine to false !
             y = self.encodeNet(input)
             output = self.midNet(y)
 
+        # print(output.size())
+        # d = output.data.cpu()
+        # d = d[0][:]
+        # print(d.size())
+        # f = open("output_same.txt", 'w')
+        # for i in range(4000):
+        #     f.write(str(d[i][0][0]) + " ")
+        # f.close()
+
         output = self.decodeNet(output)
+
+
+
         return output
 
 # Adversarial discriminator net
