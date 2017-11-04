@@ -180,6 +180,17 @@ if __name__ == "__main__":
     netD = _netD(opt.conditionAdv, opt.fineSize, nc, ndf, opt.batchSize)
     netD.load_state_dict(torch.load(netDroot))
 
+    ## set batchNormal to affine false
+    for layer in netG.encodeNet:
+        if isinstance(layer, nn.BatchNorm2d):
+            layer.training = False
+    for layer in netG.decodeNet:
+        if isinstance(layer, nn.BatchNorm2d):
+            layer.training = False
+    for layer in netG.midNet:
+        if isinstance(layer, nn.BatchNorm2d):
+            layer.training = False
+
     ## initialize variables
     if opt.noiseGen:
         noise = torch.FloatTensor(opt.batchSize, opt.nz, 1, 1)
