@@ -23,8 +23,20 @@ from random_net import _netD
 from random_net import _netG
 from random_net import parse
 
-def initMask():
-    maskroot = '/home/cad/PycharmProjects/ContextEncoder/mask3.png'
+global opt
+global label
+global real_label
+global netD
+global criterion
+global criterionMSE
+global nc
+global input_ctx
+global input_real_center
+
+def initMask(maskroot):
+    global nc
+    if maskroot == None:
+        maskroot = '/home/cad/PycharmProjects/ContextEncoder/mask3.png'
     mask = cv2.imread(maskroot, cv2.IMREAD_GRAYSCALE)
 
     if len(mask) != opt.fineSize:
@@ -113,6 +125,13 @@ def inpaint(real, pred, mask):
 
 
 def calLossG(fake):
+    global opt
+    global label
+    global real_label
+    global netD
+    global criterion
+    global criterionMSE
+
     # calculate lossG
     label.fill_(real_label)
     if opt.conditionAdv:
@@ -127,9 +146,28 @@ def calLossG(fake):
 
     return errG, errG_l2
 
+def saveOneImg(batchImg):
+    savepath = "testoutput/gen.png"
+    input = (batchImg[0] + 1) / 2
+    img = np.rollaxis(input, axis=0, start=3)
+    img = img * 255
+    img = img.astype(dtype=np.uint8)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    cv2.imwrite(savepath, img)
+    pass
+
 # here is the running part
 
-if __name__ == "__main__":
+def main(maskPath = None):
+    global opt
+    global label
+    global real_label
+    global netD
+    global criterion
+    global criterionMSE
+    global nc
+    global input_ctx
+    global input_real_center
 
     opt = parse()
 
@@ -147,17 +185,18 @@ if __name__ == "__main__":
 
     # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_val'
     # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/conference/val'
-    testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_test'
+    # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_test'
     # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/DIYtest'
     # testroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/lsunTest'
+    testroot = '/home/cad/PycharmProjects/ContextEncoder/ganTest/loadData'
     inputSize = opt.fineSize
     dataset = dset.ImageFolder(root=testroot,
-                                   transform=transforms.Compose([
-                                       transforms.Scale(inputSize),
-                                       transforms.CenterCrop(inputSize),
-                                       transforms.ToTensor(),
-                                       transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                                   ]))
+                               transform=transforms.Compose([
+                                   transforms.Scale(inputSize),
+                                   transforms.CenterCrop(inputSize),
+                                   transforms.ToTensor(),
+                                   transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                               ]))
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
                                              shuffle=False, num_workers=int(opt.workers), drop_last=True)
 
@@ -224,15 +263,14 @@ if __name__ == "__main__":
     print(netG)
     print(netD)
 
-
     ## run Context-Encoder to inpaint center
-    mask = initMask()
+    mask = initMask(maskPath)
     if opt.gpu:
         mask = mask.cuda()
 
     y1 = []
     y2 = []
-    x =[]
+    x = []
 
     for i, data in enumerate(dataloader, 0):
         real_cpu, _ = data
@@ -243,10 +281,9 @@ if __name__ == "__main__":
         real_cpu = initData(real_cpu, mask)
 
         if opt.noiseGen:
-            pred = netG({Variable(real_cpu),Variable(noise)})
+            pred = netG({Variable(real_cpu), Variable(noise)})
         else:
             pred = netG(Variable(real_cpu))
-
 
         errG_d, errG_l2 = calLossG(pred)
         # errG_d, errG_l2 = calLossG(Variable(input_real_center))
@@ -255,7 +292,9 @@ if __name__ == "__main__":
         y2.append(errG_l2.data.cpu().numpy()[0])
 
         if 1:
-            inpaint(real_cpu, pred, mask)
+            # inpaint(real_cpu, pred, mask)
+
+            saveOneImg(pred.data.cpu().numpy())
 
             vutils.save_image(pred.data,
                               'testoutput/epo%d_fake.png' % (i),
@@ -264,11 +303,15 @@ if __name__ == "__main__":
                               'testoutput/epo%d_real.png' % (i),
                               normalize=True)
 
-        if i %10 == 0:
-            print("inpaint %d"%(i))
+        if i % 10 == 0:
+            print("inpaint %d" % (i))
 
-    plt.interactive(True)
-    pl.plot(x, y1)
-    pl.plot(x, y2)
-    pl.draw()
-    print('done')
+    # plt.interactive(True)
+    # pl.plot(x, y1)
+    # pl.plot(x, y2)
+    # pl.draw()
+    print('test done')
+
+if __name__ == "__main__":
+    main()
+

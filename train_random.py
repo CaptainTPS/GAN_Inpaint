@@ -24,6 +24,29 @@ from random_net import _netD
 from random_net import _netG
 from random_net import parse
 
+global opt
+global ngpu
+global nc
+global nz
+global nBottleneck
+global ndf
+global ngf
+global nef
+global real_label
+global fake_label
+global optimizerD
+global optimizerG
+global criterionMSE
+global label
+global netD
+global criterion
+global noise
+global netG
+global input_ctx
+global input_center
+global input_ctx_vis
+global input_real_center
+
 # custom weights initialization called on netG and netD
 def weights_init(m):
     classname = m.__class__.__name__
@@ -35,10 +58,13 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 ## init data with mask
-def initMask():
+def initMask(maskroot = None):
+    global opt
+    global nc
     # 0 in mask means to be masked out, others must be 1 255
     # should be inited by another way like image or something
-    maskroot = '/home/cad/PycharmProjects/ContextEncoder/mask3.png'
+    if maskroot == None:
+        maskroot = '/home/cad/PycharmProjects/ContextEncoder/mask3.png'
     mask = cv2.imread(maskroot, cv2.IMREAD_GRAYSCALE)
 
     if len(mask) != opt.fineSize:
@@ -89,6 +115,13 @@ def initData(input, mask):
 
 # create closure to evaluate discriminator
 def fDx():
+    global optimizerD
+    global label
+    global netD
+    global criterion
+    global noise
+    global netG
+
     optimizerD.zero_grad()
     ## train with real
     label.fill_(real_label)
@@ -129,6 +162,10 @@ def fDx():
 
 # create closure to evaluate generator
 def fGx(fake):
+    global opt
+    global optimizerG
+    global criterionMSE
+
     optimizerG.zero_grad()
 
     label.fill_(real_label)  # fake labels are real for generator cost
@@ -166,8 +203,29 @@ def fGx(fake):
     return errG_total.data.mean(), errG_l2.data.mean()
 
 # here is the running part
-
-if __name__ == "__main__":
+def main(maskPath = None):
+    global opt
+    global ngpu
+    global nc
+    global nz
+    global nBottleneck
+    global ndf
+    global ngf
+    global nef
+    global real_label
+    global fake_label
+    global optimizerD
+    global optimizerG
+    global criterionMSE
+    global label
+    global netD
+    global criterion
+    global noise
+    global netG
+    global input_ctx
+    global input_center
+    global input_ctx_vis
+    global input_real_center
 
     opt = parse()
 
@@ -193,8 +251,7 @@ if __name__ == "__main__":
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
                                              shuffle=True, num_workers=int(opt.workers), drop_last=True)
 
-
-    # local value
+    # value
     ngpu = opt.gpu
     nc = opt.nc
     nz = opt.nz
@@ -258,7 +315,6 @@ if __name__ == "__main__":
     # setup optimizer
     optimizerD = optim.Adam(netD.parameters(), lr=optimStateD['lr'], betas=optimStateD['betas'])
     optimizerG = optim.Adam(netG.parameters(), lr=optimStateG['lr'], betas=optimStateG['betas'])
-
 
     # Train Context Encoder
     mask = initMask()
@@ -342,6 +398,11 @@ if __name__ == "__main__":
 
     print('begin: %d: %d: %d' % (beginT.tm_hour, beginT.tm_min, beginT.tm_sec))
     print('end: %d: %d: %d' % (endT.tm_hour, endT.tm_min, endT.tm_sec))
+
+
+if __name__ == "__main__":
+    main()
+
 
 
 
