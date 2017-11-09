@@ -130,7 +130,7 @@ class multiLossG(nn.Module):
         outlist = []
         for layer in self.lossNet:
             output = layer(output)
-            if isinstance(layer, nn.ReLU):
+            if isinstance(layer, nn.ReLU) | isinstance(layer, nn.Tanh):
                 outlist.append(output)
 
         return outlist

@@ -178,10 +178,16 @@ def fGx(real, fake, fakelist):
 
     errG_total = errG
 
-    reallist = newNetG(Variable(real))
-    errG_l2 = 0
-    for i in len(fakelist):
-        errG_l2 += criterionMSE(fakelist[i], reallist[i])
+    inputreal = Variable(real)
+    reallist = newNetG(inputreal)
+    reallist.pop()
+
+    errG_l2 = Variable(torch.FloatTensor([0])).cuda()
+    for i in range(len(reallist)):
+        var_no_grad = reallist[i].detach()
+        errG_l2 += criterionMSE(fakelist[i], var_no_grad)
+    var_no_grad = inputreal.detach()
+    errG_l2 += criterionMSE(fakelist[-1], var_no_grad)
 
     errG_total += errG_l2
 
