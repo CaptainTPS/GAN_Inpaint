@@ -65,7 +65,7 @@ class multiLossG(nn.Module):
         super(multiLossG, self).__init__()
 
         ## Encode Input Context to noise (architecture similar to Discriminator)
-        self.encodeNet = nn.Sequential(
+        self.encoder = nn.Sequential(
             ## input is (nc) x 128 x 128
             nn.Conv2d(nc, nef, 4, 2, 1),
             nn.LeakyReLU(0.2, True),
@@ -86,14 +86,13 @@ class multiLossG(nn.Module):
             nn.BatchNorm2d(nef * 8),
             nn.LeakyReLU(0.2, True),
             ## state size: (nef*8) x 4 x 4
-            nn.Conv2d(nef * 8, nBottleneck, 4)
+            nn.Conv2d(nef * 8, nBottleneck, 4),
+            nn.BatchNorm2d(nBottleneck),
+            nn.LeakyReLU(0.2, True),
             ## state size: (nBottleneck) x 1 x 1
         )
 
-        self.midNet = nn.Sequential(
-            nn.BatchNorm2d(nBottleneck),
-            nn.LeakyReLU(0.2, True),
-
+        self.decoder = nn.Sequential(
             #input is Z: (nz_size) x 1 x 1, going into a convolution
             nn.ConvTranspose2d(nBottleneck, ngf * 8, 4),
             nn.BatchNorm2d(ngf * 8),
@@ -101,11 +100,8 @@ class multiLossG(nn.Module):
             # state size: (ngf*8) x 4 x 4
             nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1),
             nn.BatchNorm2d(ngf * 4),
-            nn.ReLU(True)
+            nn.ReLU(True),
             # state size: (ngf*4) x 8 x 8
-        )
-
-        self.lossNet = nn.Sequential(
             nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1),
             nn.BatchNorm2d(ngf * 2),
             nn.ReLU(True),
@@ -124,16 +120,10 @@ class multiLossG(nn.Module):
         )
 
     def forward(self, input, noise=None):
-        y = self.encodeNet(input)
-        output = self.midNet(y)
+        y = self.encoder(input)
+        output = self.decoder(y)
 
-        outlist = []
-        for layer in self.lossNet:
-            output = layer(output)
-            if isinstance(layer, nn.ReLU) | isinstance(layer, nn.Tanh):
-                outlist.append(output)
-
-        return outlist
+        return output
 
 
 def main():

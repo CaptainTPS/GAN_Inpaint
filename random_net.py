@@ -11,7 +11,7 @@ import torch.utils.data
 def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataroot', required=True)
-    parser.add_argument('--batchSize', type=int, default=64)
+    parser.add_argument('--batchSize', type=int, default=32)
     parser.add_argument('--loadSize', type=int, default=350)
     parser.add_argument('--fineSize', type=int, default=128)
     parser.add_argument('--nBottleneck', type=int, default=100)

@@ -47,6 +47,7 @@ global input_ctx
 global input_center
 global input_ctx_vis
 global input_real_center
+global netVGG
 
 # custom weights initialization called on newNetG and netD
 def weights_init(m):
@@ -141,9 +142,7 @@ def fDx():
     elif opt.noisetype == 'normal':
         noise.normal_(0, 1)
 
-
-    fakelist = newNetG(Variable(input_ctx))
-    fake = fakelist[-1]
+    fake = newNetG(Variable(input_ctx))
     input_center.copy_(fake.data)
     label.fill_(fake_label)
     labelv = Variable(label)
@@ -158,10 +157,10 @@ def fDx():
     errD = errD_real + errD_fake
 
     optimizerD.step()
-    return errD.data.mean(), fake, fakelist
+    return errD.data.mean(), fake
 
 # create closure to evaluate generator
-def fGx(real, fake, fakelist):
+def fGx(real, fake):
     global opt
     global optimizerG
     global criterionMSE
@@ -176,24 +175,62 @@ def fGx(real, fake, fakelist):
     # output = netD.output # netD:forward({input_ctx,input_center}) was already executed in fDx, so save computation
     errG = criterion(output, Variable(label))
 
-    errG_total = errG
-
     inputreal = Variable(real)
-    reallist = newNetG(inputreal)
-    reallist.pop()
 
-    errG_l2 = Variable(torch.FloatTensor([0])).cuda()
-    for i in range(len(reallist)):
-        var_no_grad = reallist[i].detach()
-        errG_l2 += criterionMSE(fakelist[i], var_no_grad)
     var_no_grad = inputreal.detach()
-    errG_l2 += criterionMSE(fakelist[-1], var_no_grad)
+    errG_l2 = criterionMSE(fake, var_no_grad)
 
-    errG_total += errG_l2
+    errG_total = 0.01 * errG + 0.99 * errG_l2
 
     errG_total.backward()
     optimizerG.step()
     return errG_total.data.mean(), errG_l2.data.mean()
+
+def fGx_vgg(real, fake):
+    global opt
+    global optimizerG
+    global criterionMSE
+    global netVGG
+
+    optimizerG.zero_grad()
+
+    label.fill_(real_label)  # fake labels are real for generator cost
+    if opt.conditionAdv:
+        output = netD({Variable(input_ctx), fake})
+    else:
+        output = netD(fake)
+    # output = netD.output # netD:forward({input_ctx,input_center}) was already executed in fDx, so save computation
+    errG = criterion(output, Variable(label))
+
+    inputreal = Variable(real)
+    var_no_grad = inputreal.detach()
+    errG_l2 = criterionMSE(fake, var_no_grad)
+
+
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
+
+    realResult = var_no_grad
+    for x in range(len(realResult)):
+        realResult.data[x] = normalize(realResult.data[x])
+    realResult = realResult.cuda()
+    realResult = netVGG(realResult)
+    realResult = realResult.detach()
+
+    fakeResult = fake
+    for x in range(len(fakeResult)):
+        fakeResult.data[x] = normalize(fakeResult.data[x])
+    fakeResult = fakeResult.cuda()
+    fakeResult = netVGG(fakeResult)
+
+
+    errG_vgg = criterionMSE(fakeResult, realResult)
+
+    errG_total = 0.01 * errG + 0.99 * errG_l2 + 0.00001 * errG_vgg
+
+    errG_total.backward()
+    optimizerG.step()
+    return errG_total.data.mean(), errG_l2.data.mean(), errG_vgg.data.mean()
 
 # here is the running part
 def main(maskPath = None):
@@ -219,6 +256,7 @@ def main(maskPath = None):
     global input_center
     global input_ctx_vis
     global input_real_center
+    global netVGG
 
     opt = parse()
 
@@ -262,6 +300,22 @@ def main(maskPath = None):
     netD = _netD(opt.conditionAdv, opt.fineSize, nc, ndf, opt.batchSize)
     netD.apply(weights_init)
     print(netD)
+
+    import torchvision.models as models
+    netVGG = models.vgg19(pretrained=True)
+    layerCnt = 28
+    newNetVGG = nn.Sequential()
+    newNetVGG.add_module(str(len(newNetVGG._modules)), nn.UpsamplingNearest2d(scale_factor=2))
+    for layer in netVGG.features:
+        if layerCnt == 0:
+            break
+        newNetVGG.add_module(str(len(newNetVGG._modules)), layer)
+        layerCnt -= 1
+
+    netVGG = newNetVGG
+    netVGG.training = False
+    netVGG = netVGG.cuda()
+    print(netVGG)
 
     # Loss Metrics
     criterion = nn.BCELoss()
@@ -320,7 +374,97 @@ def main(maskPath = None):
     times = []
     ttt = 0
 
-    for epoch in range(opt.niter):
+    #pre train use lossGAN & lossMSE
+    if 0:
+        #load from file
+        netGroot = '/home/cad/PycharmProjects/ContextEncoder/checkpoints/random_inpaintCenter_30_netG.pth'
+        newNetG.load_state_dict(torch.load(netGroot))
+
+        netDroot = '/home/cad/PycharmProjects/ContextEncoder/checkpoints/random_inpaintCenter_30_netD.pth'
+        netD.load_state_dict(torch.load(netDroot))
+        pass
+    else:
+        for epoch in range(opt.niter):
+            try:
+                os.mkdir('checkpoints')
+            except OSError:
+                pass
+            fake = None
+            real_ctx = None
+            tm = time.time()
+
+            for i, data in enumerate(dataloader, 0):
+                real_cpu, _ = data
+
+                # tm = time.time()
+                if opt.gpu:
+                    real_cpu = real_cpu.cuda()
+
+                real_ctx = real_cpu.clone()
+
+                initData(real_cpu, mask)
+
+                # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
+                errD, fake, = fDx()
+
+                # (2) Update G network: maximize log(D(G(z)))
+                errG, errG_l2 = fGx(real_ctx, fake)
+
+                # logging
+                if 1:
+                    print(('Epoch: [%d / %d][%d / %d] Time: %.3f '
+                           + '  Err_G_L2: %.4f   Err_G: %.4f  Err_D: %.4f') % (
+                              epoch, opt.niter, i, len(dataloader),
+                              time.time() - tm,
+                              errG_l2,
+                              errG, errD))
+                    errG_l2_record.append(errG_l2)
+                    errG_record.append(errG)
+                    errD_record.append(errD)
+                    times.append(ttt)
+                    ttt += 1
+
+            if epoch % 1 == 0:
+                fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(10, 4))
+                ax0.plot(times, errG_l2_record, label="$errG_l2$", color="red")
+                ax0.plot(times, errG_record, label="$errG$")
+                ax0.legend()
+                ax1.plot(times, errD_record, label="$errD$")
+                ax1.legend()
+                plt.savefig("loss_GD.png")
+
+            # display
+            if opt.display:
+                vutils.save_image(real_ctx,
+                                  'output/random_epo%d_real.png' % (epoch),
+                                  normalize=True)
+                vutils.save_image(fake.data,
+                                  'output/random_epo%d_fake.png' % (epoch),
+                                  normalize=True)
+
+            if epoch % 10 == 0:
+                torch.save(newNetG.state_dict(), 'checkpoints/random_' + opt.name + '_' + str(epoch) + '_netG.pth')
+                torch.save(netD.state_dict(), 'checkpoints/random_' + opt.name + '_' + str(epoch) + '_netD.pth')
+                # torch.save(netG, 'checkpoints/' + opt.name + '_' + str(epoch) + '_netG.whole')
+                # torch.save(netD, 'checkpoints/' + opt.name + '_' + str(epoch) + '_netD.whole')
+
+            if epoch > 31:
+                break
+
+        endT = time.localtime()
+
+        print('begin: %d:%d:%d' % (beginT.tm_hour, beginT.tm_min, beginT.tm_sec))
+        print('end_preTrain: %d:%d:%d' % (endT.tm_hour, endT.tm_min, endT.tm_sec))
+
+    #train with lossVGG19
+    errG_l2_record = []
+    errG_vgg_record = []
+    errG_record = []
+    errD_record = []
+    times = []
+
+    vgg_iter = 10
+    for epoch in range(vgg_iter):
         try:
             os.mkdir('checkpoints')
         except OSError:
@@ -341,20 +485,21 @@ def main(maskPath = None):
             initData(real_cpu, mask)
 
             # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
-            errD, fake, fakelist = fDx()
+            errD, fake = fDx()
 
             # (2) Update G network: maximize log(D(G(z)))
-            errG, errG_l2 = fGx(real_ctx, fake, fakelist)
+            errG, errG_l2, errG_vgg = fGx_vgg(real_ctx, fake)
 
             # logging
             if 1:
                 print(('Epoch: [%d / %d][%d / %d] Time: %.3f '
-                       + '  Err_G_L2: %.4f   Err_G: %.4f  Err_D: %.4f') % (
+                       + '  Err_G_L2: %.4f   Err_G_vgg: %.4f  Err_G: %.4f ; Err_D: %.4f') % (
                           epoch, opt.niter, i, len(dataloader),
                           time.time() - tm,
-                          errG_l2,
+                          errG_l2, errG_vgg,
                           errG, errD))
                 errG_l2_record.append(errG_l2)
+                errG_vgg_record.append(errG_vgg)
                 errG_record.append(errG)
                 errD_record.append(errD)
                 times.append(ttt)
@@ -363,11 +508,12 @@ def main(maskPath = None):
         if epoch % 1 == 0:
             fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(10, 4))
             ax0.plot(times, errG_l2_record, label="$errG_l2$", color="red")
+            ax0.plot(times, errG_vgg_record, label="$errG_vgg$")
             ax0.plot(times, errG_record, label="$errG$")
             ax0.legend()
             ax1.plot(times, errD_record, label="$errD$")
             ax1.legend()
-            plt.savefig("loss.png")
+            plt.savefig("loss_vgg.png")
 
         # display
         if opt.display:
@@ -391,7 +537,6 @@ def main(maskPath = None):
 
     print('begin: %d: %d: %d' % (beginT.tm_hour, beginT.tm_min, beginT.tm_sec))
     print('end: %d: %d: %d' % (endT.tm_hour, endT.tm_min, endT.tm_sec))
-
 
 if __name__ == "__main__":
     main()
