@@ -123,6 +123,8 @@ def fDx():
     global criterion
     global noise
     global newNetG
+    global replicasG
+    global replicasD
 
     optimizerD.zero_grad()
     ## train with real
@@ -184,7 +186,7 @@ def fGx(real, fake):
 
     errG_total.backward()
     optimizerG.step()
-    return errG_total.data.mean(), errG_l2.data.mean()
+    return errG_total.data.mean(), errG.data.mean(), errG_l2.data.mean()
 
 def fGx_vgg(real, fake):
     global opt
@@ -226,11 +228,11 @@ def fGx_vgg(real, fake):
 
     errG_vgg = criterionMSE(fakeResult, realResult)
 
-    errG_total = 0.01 * errG + 0.99 * errG_l2 + 0.00001 * errG_vgg
+    errG_total = 0.005 * errG + 0.99 * errG_l2 + 0.005 * errG_vgg
 
     errG_total.backward()
     optimizerG.step()
-    return errG_total.data.mean(), errG_l2.data.mean(), errG_vgg.data.mean()
+    return errG_total.data.mean(), errG.data.mean(), errG_l2.data.mean(), errG_vgg.data.mean()
 
 # here is the running part
 def main(maskPath = None):
@@ -259,6 +261,8 @@ def main(maskPath = None):
     global netVGG
 
     opt = parse()
+
+    gpus = [0, 1]
 
     ##set seed
     if opt.manualSeed == 0:
@@ -312,7 +316,10 @@ def main(maskPath = None):
         newNetVGG.add_module(str(len(newNetVGG._modules)), layer)
         layerCnt -= 1
 
-    netVGG = newNetVGG
+    for para in newNetVGG.parameters():
+        para.requires_grad = False
+
+    netVGG = nn.DataParallel(newNetVGG)
     netVGG.training = False
     netVGG = netVGG.cuda()
     print(netVGG)
@@ -370,17 +377,18 @@ def main(maskPath = None):
     beginT = time.localtime()
     errG_l2_record = []
     errG_record = []
+    errG_total_record = []
     errD_record = []
     times = []
     ttt = 0
 
     #pre train use lossGAN & lossMSE
-    if 0:
+    if 1:
         #load from file
-        netGroot = '/home/cad/PycharmProjects/ContextEncoder/checkpoints/random_inpaintCenter_30_netG.pth'
+        netGroot = 'checkpoints/random_inpaintCenter_30_netG.pth'
         newNetG.load_state_dict(torch.load(netGroot))
 
-        netDroot = '/home/cad/PycharmProjects/ContextEncoder/checkpoints/random_inpaintCenter_30_netD.pth'
+        netDroot = 'checkpoints/random_inpaintCenter_30_netD.pth'
         netD.load_state_dict(torch.load(netDroot))
         pass
     else:
@@ -408,30 +416,32 @@ def main(maskPath = None):
                 errD, fake, = fDx()
 
                 # (2) Update G network: maximize log(D(G(z)))
-                errG, errG_l2 = fGx(real_ctx, fake)
+                errG_total, errG, errG_l2 = fGx(real_ctx, fake)
 
                 # logging
                 if 1:
                     print(('Epoch: [%d / %d][%d / %d] Time: %.3f '
-                           + '  Err_G_L2: %.4f   Err_G: %.4f  Err_D: %.4f') % (
+                           + '  Err_G_L2: %.4f   Err_G: %.4f  Err_G_total: %.4f;  Err_D: %.4f') % (
                               epoch, opt.niter, i, len(dataloader),
                               time.time() - tm,
-                              errG_l2,
-                              errG, errD))
+                              errG_l2, errG,
+                              errG_total, errD))
                     errG_l2_record.append(errG_l2)
                     errG_record.append(errG)
+                    errG_total_record.append(errG_total)
                     errD_record.append(errD)
                     times.append(ttt)
                     ttt += 1
 
             if epoch % 1 == 0:
-                fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(10, 4))
+                fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(30, 12))
                 ax0.plot(times, errG_l2_record, label="$errG_l2$", color="red")
-                ax0.plot(times, errG_record, label="$errG$")
+                ax0.plot(times, errG_total_record, label="$errG_total$", color="blue")
+                ax0.plot(times, errG_record, label="$errG$", color="green")
                 ax0.legend()
                 ax1.plot(times, errD_record, label="$errD$")
                 ax1.legend()
-                plt.savefig("loss_GD.png")
+                plt.savefig("loss_GD.png", dpi=300)
 
             # display
             if opt.display:
@@ -455,13 +465,23 @@ def main(maskPath = None):
 
         print('begin: %d:%d:%d' % (beginT.tm_hour, beginT.tm_min, beginT.tm_sec))
         print('end_preTrain: %d:%d:%d' % (endT.tm_hour, endT.tm_min, endT.tm_sec))
+        exit()
 
     #train with lossVGG19
     errG_l2_record = []
     errG_vgg_record = []
     errG_record = []
+    errG_total_record = []
     errD_record = []
     times = []
+    ttt = 0
+
+    #here this modification is to correct the lr from the transform before vgg net, which is not working in back propagation
+    optimStateG = {
+        'lr': opt.lr * 0.225,
+        'betas': (opt.beta1, 0.999)
+    }
+    optimizerG = optim.Adam(newNetG.parameters(), lr=optimStateG['lr'], betas=optimStateG['betas'])
 
     vgg_iter = 10
     for epoch in range(vgg_iter):
@@ -481,46 +501,54 @@ def main(maskPath = None):
                 real_cpu = real_cpu.cuda()
 
             real_ctx = real_cpu.clone()
+            real_input = real_cpu.clone()
 
             initData(real_cpu, mask)
 
             # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
             errD, fake = fDx()
+            fake_copy = fake.clone()
 
             # (2) Update G network: maximize log(D(G(z)))
-            errG, errG_l2, errG_vgg = fGx_vgg(real_ctx, fake)
+            errG_total, errG, errG_l2, errG_vgg = fGx_vgg(real_input, fake)
 
             # logging
             if 1:
                 print(('Epoch: [%d / %d][%d / %d] Time: %.3f '
-                       + '  Err_G_L2: %.4f   Err_G_vgg: %.4f  Err_G: %.4f ; Err_D: %.4f') % (
+                       + '  Err_G_L2: %.4f   Err_G_vgg: %.4f  Err_G: %.4f;  Err_G_total: %.4f ; Err_D: %.4f') % (
                           epoch, opt.niter, i, len(dataloader),
                           time.time() - tm,
-                          errG_l2, errG_vgg,
-                          errG, errD))
+                          errG_l2, errG_vgg,errG,
+                          errG_total, errD))
                 errG_l2_record.append(errG_l2)
                 errG_vgg_record.append(errG_vgg)
                 errG_record.append(errG)
+                errG_total_record.append(errG_total)
                 errD_record.append(errD)
                 times.append(ttt)
                 ttt += 1
+            #
+            # if i > 10:
+            #     break
 
         if epoch % 1 == 0:
-            fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(10, 4))
+            fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(30, 12))
             ax0.plot(times, errG_l2_record, label="$errG_l2$", color="red")
-            ax0.plot(times, errG_vgg_record, label="$errG_vgg$")
-            ax0.plot(times, errG_record, label="$errG$")
-            ax0.legend()
+            ax0.plot(times, errG_vgg_record, label="$errG_vgg$", color="green")
+            ax0.plot(times, errG_record, label="$errG$", color="blue")
+            ax0.plot(times, errG_total_record, label="$errG_total$",)
             ax1.plot(times, errD_record, label="$errD$")
+            ax0.legend()
             ax1.legend()
-            plt.savefig("loss_vgg.png")
+            plt.savefig("loss_vgg.png", dpi=300)
+            plt.close(fig)
 
         # display
         if opt.display:
             vutils.save_image(real_ctx,
                               'output/multiloss_epo%d_real.png' % (epoch),
                               normalize=True)
-            vutils.save_image(fake.data,
+            vutils.save_image(fake_copy.data,
                               'output/multiloss_epo%d_fake.png' % (epoch),
                               normalize=True)
 
@@ -529,9 +557,6 @@ def main(maskPath = None):
             torch.save(netD.state_dict(), 'checkpoints/multiloss_' + opt.name + '_' + str(epoch) + '_netD.pth')
             # torch.save(netG, 'checkpoints/' + opt.name + '_' + str(epoch) + '_netG.whole')
             # torch.save(netD, 'checkpoints/' + opt.name + '_' + str(epoch) + '_netD.whole')
-
-        if epoch > 31:
-            break
 
     endT = time.localtime()
 

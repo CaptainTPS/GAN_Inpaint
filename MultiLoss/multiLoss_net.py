@@ -119,6 +119,10 @@ class multiLossG(nn.Module):
             ## state size: (nc) x 128 x 128
         )
 
+        #make it distributed
+        self.encoder = nn.DataParallel(self.encoder)
+        self.decoder = nn.DataParallel(self.decoder)
+
     def forward(self, input, noise=None):
         y = self.encoder(input)
         output = self.decoder(y)

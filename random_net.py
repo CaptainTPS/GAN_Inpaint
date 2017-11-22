@@ -11,7 +11,7 @@ import torch.utils.data
 def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataroot', required=True)
-    parser.add_argument('--batchSize', type=int, default=32)
+    parser.add_argument('--batchSize', type=int, default=64)
     parser.add_argument('--loadSize', type=int, default=350)
     parser.add_argument('--fineSize', type=int, default=128)
     parser.add_argument('--nBottleneck', type=int, default=100)
@@ -50,9 +50,9 @@ class _netG(nn.Module):
 
         ## Encode Input Context to noise (architecture similar to Discriminator)
         self.encodeNet = nn.Sequential(
-        ## input is (nc) x 128 x 128
-        nn.Conv2d(nc, nef, 4, 2, 1),
-        nn.LeakyReLU(0.2, True))
+            ## input is (nc) x 128 x 128
+            nn.Conv2d(nc, nef, 4, 2, 1),
+            nn.LeakyReLU(0.2, True))
         if fineSize == 128:
         ## state size: (nef) x 64 x 64
             self.encodeNet.add_module(str(len(self.encodeNet._modules)), nn.Conv2d(nef, nef, 4, 2, 1))
@@ -120,6 +120,11 @@ class _netG(nn.Module):
         self.decodeNet.add_module(str(len(self.decodeNet._modules)), nn.ConvTranspose2d(ngf, nc, 4, 2, 1))
         self.decodeNet.add_module(str(len(self.decodeNet._modules)), nn.Tanh())
         ## state size: (nc) x 128 x 128
+
+        #make it distributed
+        self.encodeNet = nn.DataParallel(self.encodeNet)
+        self.midNet = nn.DataParallel(self.midNet)
+        self.decodeNet = nn.DataParallel(self.decodeNet)
 
 
     def forward(self, input, noise=None):
@@ -230,6 +235,9 @@ class _netD(nn.Module):
             # nn.View(1).setNumInputDims(3) #may be wrong !
             # state size: 1
         )
+        #make it distributed
+        self.midNet = nn.DataParallel(self.midNet)
+        self.tailNet = nn.DataParallel(self.tailNet)
 
     def forward(self, input):
         if self.conditionAdv:

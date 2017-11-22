@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="17609f51-6c3c-4cd4-8174-f6ebd217ea70" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/MultiLoss/Sequential.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MultiLoss/multiLoss_net.py" afterPath="$PROJECT_DIR$/MultiLoss/multiLoss_net.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MultiLoss/multiLoss_train.py" afterPath="$PROJECT_DIR$/MultiLoss/multiLoss_train.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/random_net.py" afterPath="$PROJECT_DIR$/random_net.py" />
@@ -24,11 +22,10 @@
       <file leaf-file-name="random_net.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/random_net.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="80">
-              <caret line="13" column="59" lean-forward="false" selection-start-line="13" selection-start-column="59" selection-end-line="13" selection-end-column="59" />
+            <state relative-caret-position="-1420">
+              <caret line="13" column="36" lean-forward="false" selection-start-line="13" selection-start-column="25" selection-end-line="13" selection-end-column="36" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
-                <element signature="e#7337#10151#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -37,8 +34,8 @@
       <file leaf-file-name="multiLoss_net.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/MultiLoss/multiLoss_net.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1009">
-              <caret line="62" column="12" lean-forward="false" selection-start-line="62" selection-start-column="12" selection-end-line="62" selection-end-column="12" />
+            <state relative-caret-position="300">
+              <caret line="123" column="52" lean-forward="false" selection-start-line="123" selection-start-column="52" selection-end-line="123" selection-end-column="52" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
                 <element signature="e#488#515#0" expanded="false" />
@@ -50,8 +47,8 @@
       <file leaf-file-name="multiLoss_train.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/MultiLoss/multiLoss_train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-140">
-              <caret line="515" column="33" lean-forward="false" selection-start-line="515" selection-start-column="33" selection-end-line="515" selection-end-column="33" />
+            <state relative-caret-position="80">
+              <caret line="527" column="33" lean-forward="true" selection-start-line="527" selection-start-column="33" selection-end-line="527" selection-end-column="33" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -59,11 +56,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="random_test.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/random_test.py">
+      <file leaf-file-name="pyplot.py" pinned="false" current-in-tab="false">
+        <entry file="file:///usr/local/lib/python2.7/dist-packages/matplotlib/pyplot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="219" column="46" lean-forward="true" selection-start-line="213" selection-start-column="4" selection-end-line="219" selection-end-column="46" />
+            <state relative-caret-position="220">
+              <caret line="696" column="16" lean-forward="true" selection-start-line="696" selection-start-column="16" selection-end-line="696" selection-end-column="16" />
               <folding />
             </state>
           </provider>
@@ -179,7 +176,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../test" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -384,7 +381,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="ContextEncoder" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MultiLoss/multiLoss_train.py" />
-      <option name="PARAMETERS" value="--dataroot $PROJECT_DIR$/dataset/clustermix/train --name inpaintCenter --overlapPred 4 --wtl2 0.999 --nBottleneck 4000 --niter 500 --loadSize 350 --fineSize 128 --gpu 1" />
+      <option name="PARAMETERS" value="--dataroot $PROJECT_DIR$/dataset/clustermix/train --name inpaintCenter --overlapPred 4 --wtl2 0.999 --nBottleneck 4000 --niter 500 --loadSize 350 --fineSize 128 --gpu 1 --batchSize 64" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <method />
@@ -431,8 +428,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="64" y="-11" width="1857" height="1092" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.106738545" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.106738545" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="LuaJ" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3853211" sideWeight="0.5018868" order="7" side_tool="true" content_ui="tabs" />
@@ -441,7 +439,7 @@
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32925585" sideWeight="0.49811321" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32110092" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.42201835" sideWeight="0.49811321" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.42201835" sideWeight="0.49811321" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32991913" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -497,28 +495,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="222" />
+      <option name="time" value="253" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/context-encoder-master/LICENSE.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SECOND">
-          <first_editor relative-caret-position="-157">
-            <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/local/lib/python2.7/dist-packages/torch/utils/serialization/read_lua_file.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="595" column="7" lean-forward="false" selection-start-line="595" selection-start-column="7" selection-end-line="595" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/lib/python2.7/dist-packages/torchvision/datasets/folder.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="396">
@@ -769,6 +750,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3520">
           <caret line="200" column="12" lean-forward="false" selection-start-line="200" selection-start-column="12" selection-end-line="200" selection-end-column="12" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -791,6 +773,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="780">
           <caret line="42" column="18" lean-forward="false" selection-start-line="42" selection-start-column="18" selection-end-line="42" selection-end-column="18" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -828,14 +811,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/local/lib/python2.7/dist-packages/torch/nn/modules/module.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3940">
-          <caret line="205" column="0" lean-forward="false" selection-start-line="205" selection-start-column="0" selection-end-line="205" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/lib/python2.7/dist-packages/torch/nn/_functions/thnn/upsampling.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="580">
@@ -860,29 +835,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/random_net.py">
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/matplotlib/axes/_axes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="80">
-          <caret line="13" column="59" lean-forward="false" selection-start-line="13" selection-start-column="59" selection-end-line="13" selection-end-column="59" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-            <element signature="e#7337#10151#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="-1320">
+          <caret line="1267" column="8" lean-forward="false" selection-start-line="1267" selection-start-column="8" selection-end-line="1267" selection-end-column="8" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/random_test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="219" column="46" lean-forward="true" selection-start-line="213" selection-start-column="4" selection-end-line="219" selection-end-column="46" />
+        <state relative-caret-position="200">
+          <caret line="212" column="0" lean-forward="true" selection-start-line="212" selection-start-column="0" selection-end-line="212" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/torch/nn/modules/module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="103" column="34" lean-forward="false" selection-start-line="103" selection-start-column="34" selection-end-line="103" selection-end-column="34" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/MultiLoss/multiLoss_net.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1009">
-          <caret line="62" column="12" lean-forward="false" selection-start-line="62" selection-start-column="12" selection-end-line="62" selection-end-column="12" />
+        <state relative-caret-position="300">
+          <caret line="123" column="52" lean-forward="false" selection-start-line="123" selection-start-column="52" selection-end-line="123" selection-end-column="52" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
             <element signature="e#488#515#0" expanded="false" />
@@ -890,10 +870,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/random_net.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1420">
+          <caret line="13" column="36" lean-forward="false" selection-start-line="13" selection-start-column="25" selection-end-line="13" selection-end-column="36" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/matplotlib/pyplot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="696" column="16" lean-forward="true" selection-start-line="696" selection-start-column="16" selection-end-line="696" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/MultiLoss/multiLoss_train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-140">
-          <caret line="515" column="33" lean-forward="false" selection-start-line="515" selection-start-column="33" selection-end-line="515" selection-end-column="33" />
+        <state relative-caret-position="80">
+          <caret line="527" column="33" lean-forward="true" selection-start-line="527" selection-start-column="33" selection-end-line="527" selection-end-column="33" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
