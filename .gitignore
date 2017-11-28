@@ -9,3 +9,5 @@
 
 #input & output
 *.data
+
+dataset/combination/train/

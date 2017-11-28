@@ -6,7 +6,10 @@ import os
 import numpy as np
 import cv2
 import copy
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
+
 
 import torch
 import torch.nn as nn
@@ -379,11 +382,12 @@ def main(maskPath = None):
     errG_record = []
     errG_total_record = []
     errD_record = []
+    avg_record = []
     times = []
     ttt = 0
 
     #pre train use lossGAN & lossMSE
-    if 1:
+    if 0:
         #load from file
         netGroot = 'checkpoints/random_inpaintCenter_30_netG.pth'
         newNetG.load_state_dict(torch.load(netGroot))
@@ -400,6 +404,9 @@ def main(maskPath = None):
             fake = None
             real_ctx = None
             tm = time.time()
+
+            #record avg
+            curr = []
 
             for i, data in enumerate(dataloader, 0):
                 real_cpu, _ = data
@@ -430,27 +437,37 @@ def main(maskPath = None):
                     errG_record.append(errG)
                     errG_total_record.append(errG_total)
                     errD_record.append(errD)
+                    curr.append(errG_total)
                     times.append(ttt)
                     ttt += 1
 
-            if epoch % 1 == 0:
-                fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(30, 12))
+                if i > 10:
+                    break
+
+            avg_record.append(np.mean(curr))
+
+            if epoch % 10 == 0:
+                fig, (ax0, ax1, ax2) = plt.subplots(ncols=3, figsize=(30, 10))
                 ax0.plot(times, errG_l2_record, label="$errG_l2$", color="red")
                 ax0.plot(times, errG_total_record, label="$errG_total$", color="blue")
                 ax0.plot(times, errG_record, label="$errG$", color="green")
                 ax0.legend()
                 ax1.plot(times, errD_record, label="$errD$")
                 ax1.legend()
+                ax2.plot(avg_record, label="avg_loss")
+                ax2.legend()
                 plt.savefig("loss_GD.png", dpi=300)
+                plt.close(fig)
 
             # display
             if opt.display:
+                nrow =int(np.sqrt(opt.batchSize))
                 vutils.save_image(real_ctx,
                                   'output/random_epo%d_real.png' % (epoch),
-                                  normalize=True)
+                                  nrow=nrow, normalize=True)
                 vutils.save_image(fake.data,
                                   'output/random_epo%d_fake.png' % (epoch),
-                                  normalize=True)
+                                  nrow=nrow, normalize=True)
 
             if epoch % 10 == 0:
                 torch.save(newNetG.state_dict(), 'checkpoints/random_' + opt.name + '_' + str(epoch) + '_netG.pth')
@@ -458,7 +475,7 @@ def main(maskPath = None):
                 # torch.save(netG, 'checkpoints/' + opt.name + '_' + str(epoch) + '_netG.whole')
                 # torch.save(netD, 'checkpoints/' + opt.name + '_' + str(epoch) + '_netD.whole')
 
-            if epoch > 31:
+            if epoch > 200:
                 break
 
         endT = time.localtime()
@@ -527,7 +544,7 @@ def main(maskPath = None):
                 errD_record.append(errD)
                 times.append(ttt)
                 ttt += 1
-            #
+
             # if i > 10:
             #     break
 
@@ -541,7 +558,7 @@ def main(maskPath = None):
             ax0.legend()
             ax1.legend()
             plt.savefig("loss_vgg.png", dpi=300)
-            plt.close(fig)
+            plt.close()
 
         # display
         if opt.display:
