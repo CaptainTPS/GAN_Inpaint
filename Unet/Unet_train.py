@@ -18,7 +18,7 @@ from torch.autograd import Variable
 
 def main():
     dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/clustermix/train"
-    batchSize = 64
+    batchSize = 128
     inputSize = 128
     channel = 3
     learningrate = 0.001
@@ -40,9 +40,13 @@ def main():
     uModel = UNET(inputSize, inputSize, channel)
     if ngpu:
         uModel = uModel.cuda()
+        uModel = nn.DataParallel(uModel)
 
     # load optimizer
     optimizerU = optim.Adam(uModel.parameters(), lr=learningrate)
+
+    # load loss function
+    lossF= nn.MSELoss()
 
     #training
     loss_re = []
@@ -62,11 +66,12 @@ def main():
 
         for i, data in enumerate(dataloader, 0):
             img_data, _ = data
+            img_data = Variable(img_data)
             if ngpu:
                 img_data = img_data.cuda()
 
-            output = uModel(Variable(img_data))
-            loss = nn.MSELoss(output, img_data)
+            output = uModel(img_data)
+            loss = lossF(output, img_data)
             loss.backward()
             optimizerU.step()
 

@@ -132,11 +132,11 @@ class UNET(nn.Module):
         up3 = self.up3_2(up3)
         # n * 64 * 64 * 64
 
-        up4 = self.up2_1(up3)
+        up4 = self.up4_1(up3)
         # n * 32 * 128 * 128
         up4 = torch.cat((up4, conv1), dim=1)
         # n * 64 * 128 * 128
-        up4 = self.up2_2(up4)
+        up4 = self.up4_2(up4)
         # n * 32 * 128 * 128
 
         output = self.up5(up4)

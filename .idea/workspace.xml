@@ -2,20 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="17609f51-6c3c-4cd4-8174-f6ebd217ea70" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/Unet_net.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/Unet_train.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/u-net-master/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/u-net-master/.vscode/settings.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/u-net-master/README.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/u-net-master/all.sh" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/u-net-master/data.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/u-net-master/submission.csv" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/u-net-master/submission.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/u-net-master/train.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Unet/u-net-master/train_res.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MultiLoss/multiLoss_train.py" afterPath="$PROJECT_DIR$/MultiLoss/multiLoss_train.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Unet/Unet_net.py" afterPath="$PROJECT_DIR$/Unet/Unet_net.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Unet/Unet_train.py" afterPath="$PROJECT_DIR$/Unet/Unet_train.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -32,52 +20,13 @@
     <splitter split-orientation="horizontal" split-proportion="0.5">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="multiLoss_net.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/MultiLoss/multiLoss_net.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="511">
-                  <caret line="125" column="24" lean-forward="false" selection-start-line="125" selection-start-column="24" selection-end-line="125" selection-end-column="24" />
-                  <folding>
-                    <element signature="e#0#21#0" expanded="true" />
-                    <element signature="e#488#515#0" expanded="false" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="multiLoss_train.py" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/MultiLoss/multiLoss_train.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="380">
-                  <caret line="213" column="0" lean-forward="true" selection-start-line="213" selection-start-column="0" selection-end-line="213" selection-end-column="0" />
-                  <folding>
-                    <element signature="e#0#11#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="Unet_net.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="Unet_net.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/Unet/Unet_net.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="202">
-                  <caret line="96" column="90" lean-forward="false" selection-start-line="96" selection-start-column="90" selection-end-line="96" selection-end-column="90" />
+                <state relative-caret-position="320">
+                  <caret line="16" column="9" lean-forward="true" selection-start-line="16" selection-start-column="9" selection-end-line="16" selection-end-column="9" />
                   <folding>
                     <element signature="e#0#21#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="Unet_train.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/Unet/Unet_train.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="120">
-                  <caret line="39" column="4" lean-forward="false" selection-start-line="39" selection-start-column="4" selection-end-line="39" selection-end-column="4" />
-                  <folding>
-                    <element signature="e#0#25#0" expanded="true" />
-                    <marker date="1511853985143" expanded="true" signature="373:3330" ph="..." />
-                    <marker date="1511853985143" expanded="true" signature="1676:2350" ph="..." />
                   </folding>
                 </state>
               </provider>
@@ -90,8 +39,8 @@
           <file leaf-file-name="Unet_train.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/Unet/Unet_train.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="337">
-                  <caret line="67" column="16" lean-forward="true" selection-start-line="67" selection-start-column="16" selection-end-line="67" selection-end-column="16" />
+                <state relative-caret-position="257">
+                  <caret line="20" column="19" lean-forward="false" selection-start-line="20" selection-start-column="19" selection-end-line="20" selection-end-column="19" />
                   <folding>
                     <element signature="e#0#25#0" expanded="true" />
                   </folding>
@@ -944,6 +893,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/MultiLoss/multiLoss_train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="213" column="0" lean-forward="true" selection-start-line="213" selection-start-column="0" selection-end-line="213" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/MultiLoss/multiLoss_net.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="511">
@@ -955,34 +914,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Unet/Unet_net.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="96" column="90" lean-forward="false" selection-start-line="96" selection-start-column="90" selection-end-line="96" selection-end-column="90" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Unet/Unet_train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="39" column="4" lean-forward="false" selection-start-line="39" selection-start-column="4" selection-end-line="39" selection-end-column="4" />
+        <state relative-caret-position="257">
+          <caret line="20" column="19" lean-forward="false" selection-start-line="20" selection-start-column="19" selection-end-line="20" selection-end-column="19" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
-            <marker date="1511853985143" expanded="true" signature="373:3330" ph="..." />
-            <marker date="1511853985143" expanded="true" signature="1676:2350" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MultiLoss/multiLoss_train.py">
+    <entry file="file://$PROJECT_DIR$/Unet/Unet_net.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="213" column="0" lean-forward="true" selection-start-line="213" selection-start-column="0" selection-end-line="213" selection-end-column="0" />
+        <state relative-caret-position="320">
+          <caret line="16" column="9" lean-forward="true" selection-start-line="16" selection-start-column="9" selection-end-line="16" selection-end-column="9" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
