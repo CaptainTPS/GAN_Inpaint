@@ -177,6 +177,7 @@ class UNET(nn.Module):
 
 class DNET(nn.Module):
     def __init__(self, batch, nc, inputSize, nf):
+        super(DNET, self).__init__()
         # input batch * nc * inputSize * inputSize
         self.batch = batch
         n = inputSize
@@ -188,16 +189,19 @@ class DNET(nn.Module):
         feature = nf
         # batch * nf * inputSize * inputSize
         while n > 1:
-            self.net.add_module(str(len(self.midNet._modules)), nn.Conv2d(feature, feature * 2, 4, 2, 1))
-            self.net.add_module(str(len(self.midNet._modules)), nn.BatchNorm2d(feature * 2))
-            self.net.add_module(str(len(self.midNet._modules)), nn.LeakyReLU(0.2, True))
+            self.net.add_module(str(len(self.net._modules)), nn.Conv2d(feature, feature * 2, 4, 2, 1))
+            self.net.add_module(str(len(self.net._modules)), nn.BatchNorm2d(feature * 2))
+            self.net.add_module(str(len(self.net._modules)), nn.LeakyReLU(0.2, True))
             feature = feature * 2
             n = n / 2
         # batch * feature x 1 x 1
-        self.net.add_module(str(len(self.midNet._modules)), nn.Conv2d(feature, 1, 1, 1))
-        self.net.add_module(str(len(self.midNet._modules)), nn.Sigmoid())
+        self.net.add_module(str(len(self.net._modules)), nn.Conv2d(feature, 1, 1, 1))
+        self.net.add_module(str(len(self.net._modules)), nn.Sigmoid())
         # batch * 1 x 1 x 1
         pass
+
+        # because view() cannot be distributed, just make net distributed
+        self.net = nn.DataParallel(self.net)
 
     def forward(self, input):
         output = self.net(input)

@@ -57,7 +57,7 @@ def weights_init(m):
 def main():
     dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/clustermix/train"
     # dataroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/test128'
-    batchSize = 32
+    batchSize = 64
     inputSize = 128
     channel = 3
     learningrate = 0.0001
@@ -92,7 +92,7 @@ def main():
     dModel.apply(weights_init)
     if ngpu:
         dModel = dModel.cuda()
-        dModel = nn.DataParallel(dModel)
+        # !!! dModel = nn.DataParallel(dModel)
     if 0:
         NetDroot = "checkpoints/dModel_90.pth"
         dModel.load_state_dict(torch.load(NetDroot))
@@ -112,8 +112,15 @@ def main():
         real_label = real_label.cuda()
 
     #training
-    loss_re = []
-    avg_re = []
+    lossD_list = []
+    lossG_list = []
+    avg_D = []
+    avg_G = []
+    loss_img_list = []
+    loss_mask_list = []
+    loss_ad_list = []
+    lossD_real_list = []
+    lossD_fake_list = []
     img_real = None
     img_fake = None
     beginT = time.localtime()
@@ -127,11 +134,12 @@ def main():
     except OSError:
         pass
 
-    iter_times = 11
+    iter_times = 101
     mask_gpu = Variable(1-mask).cuda()
 
     for epoch in range(iter_times):
-        loss_epoch = []
+        epochD = []
+        epochG = []
 
         for i, data in enumerate(dataloader, 0):
             img_data, _ = data
@@ -143,12 +151,19 @@ def main():
                 img_data = img_data.cuda()
                 img_target = img_target.cuda()
 
-            # train unet(G)
+            # train Unet(G)
+            optimizerU.zero_grad()
             output = uModel(img_data)
             loss_img = lossF(output, img_target)
             loss_mask = lossF(output * mask_gpu, img_target *mask_gpu)
+            Doutput = dModel(output)
+            loss_ad = lossBCE(Doutput, real_label)
+            lossG = 0.1 * loss_img + 0.8 * loss_mask + 0.1 * loss_ad
+            lossG.backward()
+            optimizerU.step()
 
-            #train dnet
+            #train Dnet
+            optimizerD.zero_grad()
             fake_input = Variable(torch.FloatTensor(output.size()))
             fake_input.data.copy_(output.data)
             real_input = img_target
@@ -157,8 +172,10 @@ def main():
             lossD_fake = lossBCE(fake_output, fake_label)
             real_output = dModel(real_input)
             lossD_real = lossBCE(real_output, real_label)
+            lossD = 0.5 * lossD_fake + 0.5 * lossD_real
+            lossD.backward()
+            optimizerD.step()
 
-            loss = 0.1 * loss_img + 0.9 * loss_mask
             # print(loss)
             # print(output.size())
             # print(img_target.size())
@@ -173,22 +190,38 @@ def main():
             # print(img_target[0][2].min(), img_target[0][2].max())
             # torch.save(img_target.data.cpu(), "target.data")
             # exit()
-            loss.backward()
-            optimizerU.step()
 
-            print(('Epoch: [%d / %d][%d / %d] Loss: %.4f; LossIMG: %.4f, LossMASK: %.4f'
+            print(('Epoch: [%d / %d][%d / %d] '
+                   'LossG: %.4f; LossIMG: %.4f, LossMASK: %.4f, LossAD: %.4f; '
+                   '|| LossD: %.4f; LossFAKE: %.4f, LossREAL: %.4f;'
                    ) % (epoch, iter_times, i, len(dataloader),
-                      loss.data.mean(), loss_img.data.mean(), loss_mask.data.mean()))
+                      lossG.data.mean(), loss_img.data.mean(), loss_mask.data.mean(), loss_ad.data.mean(),
+                      lossD.data.mean(), lossD_fake.data.mean(), lossD_real.data.mean()
+                        ))
             # record
             if 1:
-                loss_re.append(loss.data.mean())
-                loss_epoch.append(loss.data.mean())
-                if i == 0:
+                epochD.append(lossD.data.mean())
+                epochG.append(lossG.data.mean())
+
+                lossD_list.append(lossD.data.mean())
+                lossG_list.append(lossG.data.mean())
+
+                loss_img_list.append(loss_img.data.mean())
+                loss_mask_list.append(loss_mask.data.mean())
+                loss_ad_list.append(loss_ad.data.mean())
+
+                lossD_real_list.append(lossD_real.data.mean())
+                lossD_fake_list.append(lossD_fake.data.mean())
+
+            if i == 0:
                     img_real = img_target.clone()
                     img_fake = output.clone()
 
         # record every epoch
         if 1:
+            avg_D.append(np.mean(epochD))
+            avg_G.append(np.mean(epochG))
+
             nrow = int(np.sqrt(batchSize))
             vutils.save_image(img_real.data,
                               'output/unet_epo%d_real.png' % (epoch),
@@ -196,19 +229,45 @@ def main():
             vutils.save_image(img_fake.data,
                               'output/unet_epo%d_fake.png' % (epoch),
                               nrow=nrow, normalize=True)
-            avg_re.append(np.mean(loss_epoch))
 
         if epoch % 3 == 0:
             fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(20, 10))
-            ax0.plot(loss_re, label="$loss$")
+            ax0.plot(lossD_list, label="$lossD$")
             ax0.legend()
-            ax1.plot(avg_re, label="$loss_avg$")
+            ax1.plot(lossG_list, label="$lossG$")
             ax1.legend()
-            plt.savefig("loss_Unet.png", dpi=200)
+            plt.savefig("loss_GD.png", dpi=200)
+            plt.close(fig)
+
+            fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(20, 10))
+            ax0.plot(avg_D, label="$lossD_avg$")
+            ax0.legend()
+            ax1.plot(avg_G, label="$lossG_avg$")
+            ax1.legend()
+            plt.savefig("loss_GD_avg.png", dpi=200)
+            plt.close(fig)
+
+            fig, (ax0, ax1, ax2) = plt.subplots(ncols=3, figsize=(30, 10))
+            ax0.plot(loss_img_list, label="$loss_img$")
+            ax0.legend()
+            ax1.plot(loss_mask_list, label="$loss_mask$")
+            ax1.legend()
+            ax2.plot(loss_ad_list, label="$loss_ad$")
+            ax2.legend()
+            plt.savefig("loss_G_detail.png", dpi=200)
+            plt.close(fig)
+
+            fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(20, 10))
+            ax0.plot(lossD_fake_list, label="$loss_fake$")
+            ax0.legend()
+            ax1.plot(lossD_real_list, label="$loss_real$")
+            ax1.legend()
+            plt.savefig("loss_D_detail.png", dpi=200)
             plt.close(fig)
 
         if epoch % 10 == 0:
             torch.save(uModel.state_dict(), 'checkpoints/Umodel_' + str(epoch) + '.pth')
+            torch.save(dModel.state_dict(), 'checkpoints/dModel_' + str(epoch) + '.pth')
 
     endT = time.localtime()
     print('begin: %d:%d:%d' % (beginT.tm_hour, beginT.tm_min, beginT.tm_sec))
