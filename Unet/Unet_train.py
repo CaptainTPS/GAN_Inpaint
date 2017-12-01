@@ -1,4 +1,5 @@
 from Unet_net import UNET
+from Unet_net import DNET
 
 import time
 import numpy as np
@@ -56,10 +57,10 @@ def weights_init(m):
 def main():
     dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/clustermix/train"
     # dataroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/test128'
-    batchSize = 128
+    batchSize = 32
     inputSize = 128
     channel = 3
-    learningrate = 0.0003
+    learningrate = 0.0001
     ngpu = 2
 
     # load data
@@ -71,7 +72,7 @@ def main():
                                    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                                ]))
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batchSize,
-                                             shuffle=False, num_workers=3, drop_last=True)
+                                             shuffle=True, num_workers=3, drop_last=True)
 
 
     # load mask
@@ -87,11 +88,28 @@ def main():
         NetUroot = "checkpoints/Umodel_90.pth"
         uModel.load_state_dict(torch.load(NetUroot))
 
+    dModel = DNET(batch=batchSize, nc=channel, inputSize=inputSize, nf=32)
+    dModel.apply(weights_init)
+    if ngpu:
+        dModel = dModel.cuda()
+        dModel = nn.DataParallel(dModel)
+    if 0:
+        NetDroot = "checkpoints/dModel_90.pth"
+        dModel.load_state_dict(torch.load(NetDroot))
+
     # load optimizer
     optimizerU = optim.Adam(uModel.parameters(), lr=learningrate)
+    optimizerD = optim.Adam(dModel.parameters())
 
     # load loss function
     lossF= nn.MSELoss()
+    lossF = nn.L1Loss()
+    lossBCE = nn.BCELoss()
+    fake_label = Variable(torch.FloatTensor(batchSize).fill_(0))
+    real_label = Variable(torch.FloatTensor(batchSize).fill_(1))
+    if ngpu:
+        fake_label = fake_label.cuda()
+        real_label = real_label.cuda()
 
     #training
     loss_re = []
@@ -109,7 +127,7 @@ def main():
     except OSError:
         pass
 
-    iter_times = 100
+    iter_times = 11
     mask_gpu = Variable(1-mask).cuda()
 
     for epoch in range(iter_times):
@@ -125,10 +143,22 @@ def main():
                 img_data = img_data.cuda()
                 img_target = img_target.cuda()
 
+            # train unet(G)
             output = uModel(img_data)
             loss_img = lossF(output, img_target)
             loss_mask = lossF(output * mask_gpu, img_target *mask_gpu)
-            loss = 0.1 * loss_img + 1.5 * loss_mask
+
+            #train dnet
+            fake_input = Variable(torch.FloatTensor(output.size()))
+            fake_input.data.copy_(output.data)
+            real_input = img_target
+
+            fake_output = dModel(fake_input)
+            lossD_fake = lossBCE(fake_output, fake_label)
+            real_output = dModel(real_input)
+            lossD_real = lossBCE(real_output, real_label)
+
+            loss = 0.1 * loss_img + 0.9 * loss_mask
             # print(loss)
             # print(output.size())
             # print(img_target.size())
@@ -154,13 +184,13 @@ def main():
                 loss_re.append(loss.data.mean())
                 loss_epoch.append(loss.data.mean())
                 if i == 0:
-                    img_real = img_data.clone()
+                    img_real = img_target.clone()
                     img_fake = output.clone()
 
         # record every epoch
         if 1:
             nrow = int(np.sqrt(batchSize))
-            vutils.save_image(img_target.data,
+            vutils.save_image(img_real.data,
                               'output/unet_epo%d_real.png' % (epoch),
                               nrow=nrow, normalize=True)
             vutils.save_image(img_fake.data,

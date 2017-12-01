@@ -175,3 +175,32 @@ class UNET(nn.Module):
         output = self.cat(output)
         return output
 
+class DNET(nn.Module):
+    def __init__(self, batch, nc, inputSize, nf):
+        # input batch * nc * inputSize * inputSize
+        self.batch = batch
+        n = inputSize
+        self.net = nn.Sequential(
+            nn.Conv2d(nc, nf, 4, 2, 1),
+            nn.LeakyReLU(0.2, True)
+        )
+        n = n / 2
+        feature = nf
+        # batch * nf * inputSize * inputSize
+        while n > 1:
+            self.net.add_module(str(len(self.midNet._modules)), nn.Conv2d(feature, feature * 2, 4, 2, 1))
+            self.net.add_module(str(len(self.midNet._modules)), nn.BatchNorm2d(feature * 2))
+            self.net.add_module(str(len(self.midNet._modules)), nn.LeakyReLU(0.2, True))
+            feature = feature * 2
+            n = n / 2
+        # batch * feature x 1 x 1
+        self.net.add_module(str(len(self.midNet._modules)), nn.Conv2d(feature, 1, 1, 1))
+        self.net.add_module(str(len(self.midNet._modules)), nn.Sigmoid())
+        # batch * 1 x 1 x 1
+        pass
+
+    def forward(self, input):
+        output = self.net(input)
+        output = output.view(self.batch)
+        return output
+        pass
