@@ -23,13 +23,13 @@ from torch.autograd import Variable
 
 def main():
     ngpu = 2
-    batchSize = 64
-    inputSize = 128
+    batchSize = 1
+    inputSize = 256
     channel = 3
 
     # load nets
-    Uroot = "checkpoints/Umodel_100.pth"
-    Droot = "checkpoints/dModel_100.pth"
+    Uroot = "checkpoints/Umodel_50.pth"
+    Droot = "checkpoints/dModel_50.pth"
     uModel = UNET(inputSize, inputSize, channel)
     dModel = DNET(batch=batchSize, nc=channel, inputSize=inputSize, nf=32)
     if ngpu:
@@ -39,9 +39,13 @@ def main():
         dModel = dModel.cuda()
     uModel.load_state_dict(torch.load(Uroot))
     dModel.load_state_dict(torch.load(Droot))
+    uModel.eval()
+    dModel.eval()
 
     # load data
-    dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/conference/val"
+    # dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/conference/val"
+    dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/disparityTest"
+    # dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/conference/test"
     dataset = dset.ImageFolder(root=dataroot,
                                transform=transforms.Compose([
                                    transforms.Scale(inputSize),

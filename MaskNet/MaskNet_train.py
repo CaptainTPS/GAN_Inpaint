@@ -1,5 +1,5 @@
-from Unet_net import UNET
-from Unet_net import DNET
+from MaskNet_net import MASKDNET
+from MaskNet_net import MASKNET
 
 import time
 import numpy as np
@@ -18,16 +18,10 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 from torch.autograd import Variable
 
-def getMask(fineSize, batchSize, nc, maskroot = None):
-    if maskroot == None:
-        maskroot = '/home/cad/PycharmProjects/ContextEncoder/mask2.png'
-    mask = cv2.imread(maskroot, cv2.IMREAD_GRAYSCALE)
-
-    if len(mask) != fineSize:
-        mask = cv2.resize(mask, (fineSize, fineSize))
-
+def randomMask(fineSize, batchSize, nc):
+    mask = np.random.rand(fineSize, fineSize)
     mask = torch.from_numpy(mask)
-    mask = (mask == 255)
+    mask = (mask >= 0.5)
 
     mask = mask.type(torch.FloatTensor)
     m = torch.FloatTensor(batchSize, nc, fineSize, fineSize)
@@ -57,7 +51,7 @@ def weights_init(m):
 def main():
     dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/clustermix/train"
     # dataroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/test128'
-    batchSize = 32
+    batchSize = 16
     inputSize = 256
     channel = 3
     learningrate = 0.0001
@@ -74,12 +68,11 @@ def main():
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batchSize,
                                              shuffle=True, num_workers=3, drop_last=True)
 
-
-    # load mask
-    mask = getMask(inputSize, batchSize, channel)
+    #load mask for the first time
+    mask = randomMask(inputSize, batchSize, channel)
 
     # load model
-    uModel = UNET(inputSize, inputSize, channel)
+    uModel = MASKNET(inputSize, inputSize, channel, nfeature=32, downTimes=5)
     uModel.apply(weights_init)
     if ngpu:
         uModel = uModel.cuda()
@@ -88,7 +81,7 @@ def main():
         NetUroot = "checkpoints/Umodel_90.pth"
         uModel.load_state_dict(torch.load(NetUroot))
 
-    dModel = DNET(batch=batchSize, nc=channel, inputSize=inputSize, nf=32)
+    dModel = MASKDNET(batch=batchSize, nc=channel, inputSize=inputSize, nf=32)
     dModel.apply(weights_init)
     if ngpu:
         dModel = dModel.cuda()
@@ -134,14 +127,22 @@ def main():
     except OSError:
         pass
 
-    iter_times = 51
-    mask_gpu = Variable(1-mask).cuda()
+    iter_times = 21
+
+    changeMaskCnt = 0
+    mask_gpu = Variable(mask).cuda()
 
     for epoch in range(iter_times):
         epochD = []
         epochG = []
 
         for i, data in enumerate(dataloader, 0):
+
+            changeMaskCnt = changeMaskCnt + 1
+            if changeMaskCnt % 50 == 0:
+                mask = randomMask(inputSize, batchSize, channel)
+                mask_gpu = Variable(mask).cuda()
+
             img_data, _ = data
             img_target = img_data.clone()
             img_target = Variable(img_target)
@@ -153,10 +154,10 @@ def main():
 
             # train Unet(G)
             optimizerU.zero_grad()
-            output = uModel(img_data)
+            output = uModel(img_data, mask_gpu)
             loss_img = lossF(output, img_target)
             loss_mask = lossF(output * mask_gpu, img_target *mask_gpu)
-            Doutput = dModel(output)
+            Doutput = dModel(output, mask_gpu)
             loss_ad = lossBCE(Doutput, real_label)
             lossG = 0.1 * loss_img + 0.8 * loss_mask + 0.1 * loss_ad
             lossG.backward()
@@ -167,10 +168,12 @@ def main():
             fake_input = Variable(torch.FloatTensor(output.size()))
             fake_input.data.copy_(output.data)
             real_input = img_target
+            fake_input = fake_input.cuda()
+            real_input = real_input.cuda()
 
-            fake_output = dModel(fake_input)
+            fake_output = dModel(fake_input, mask_gpu)
             lossD_fake = lossBCE(fake_output, fake_label)
-            real_output = dModel(real_input)
+            real_output = dModel(real_input, mask_gpu)
             lossD_real = lossBCE(real_output, real_label)
             lossD = 0.5 * lossD_fake + 0.5 * lossD_real
             lossD.backward()
@@ -265,7 +268,7 @@ def main():
             plt.savefig("loss_D_detail.png", dpi=200)
             plt.close(fig)
 
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             torch.save(uModel.state_dict(), 'checkpoints/Umodel_' + str(epoch) + '.pth')
             torch.save(dModel.state_dict(), 'checkpoints/dModel_' + str(epoch) + '.pth')
 
