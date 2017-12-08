@@ -41,10 +41,99 @@ def getMask(fineSize, batchSize, nc, maskroot = None):
 
     return m
 
+def getMaskList(fineSize, batchSize, nc):
+    from os import listdir
+    from os.path import isfile, join
+
+    folder = "masks256"
+    cnt = 120
+    onlyfiles = []
+    for i in range(cnt):
+        fname = "disparityMask1_" + str(i) + ".png"
+        onlyfiles.append(join(folder, fname))
+    # onlyfiles = [join(folder, f) for f in listdir(folder) if isfile(join(folder, f))]
+
+    masklist = []
+    for srcf in onlyfiles:
+        mask = cv2.imread(srcf, cv2.IMREAD_GRAYSCALE)
+        if len(mask) != fineSize:
+            mask = cv2.resize(mask, (fineSize, fineSize))
+
+        mask = torch.from_numpy(mask)
+        mask = (mask == 255)
+
+        mask = mask.type(torch.FloatTensor)
+        m = torch.FloatTensor(batchSize, nc, fineSize, fineSize)
+
+        for i in range(batchSize):
+            m[i, 0, :, :] = mask
+            m[i, 1, :, :] = mask
+            m[i, 2, :, :] = mask
+
+        masklist.append(m)
+
+    return masklist
+
+def getImageList(fineSize, batchSize, nc, root=None):
+    from os.path import join
+    from PIL import Image
+    if batchSize != 1:
+        print("batch size should be 1")
+        exit()
+
+    if root == None:
+        root = "images256"
+
+    cnt = 120
+    onlyfiles = []
+    for i in range(cnt):
+        fname = "disparityImg1_"+str(i)+".png"
+        onlyfiles.append(join(root, fname))
+    # onlyfiles = [join(folder, f) for f in listdir(folder) if isfile(join(folder, f))]
+
+    trans = transforms.Compose([
+        transforms.Scale(fineSize),
+        transforms.CenterCrop(fineSize),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ])
+
+    imglist = []
+    for srcf in onlyfiles:
+        img = Image.open(srcf).convert('RGB')
+        m1 = trans(img)
+        m = torch.FloatTensor(batchSize, nc, fineSize, fineSize)
+        m[0] = m1
+        imglist.append(m)
+
+    return imglist
+
+
+def saveOneImage(tensor, id, root=None):
+    from PIL import Image
+
+    if root == None:
+        root = "result256"
+
+    ndarr = tensor.numpy()
+    ndarr = ndarr[0]
+    ndarr = ndarr * 255
+
+    sh = ndarr.shape
+    toimage = np.zeros((sh[1], sh[2], sh[0]), dtype=np.uint8)
+    for i in range(sh[0]):
+        for j in range(sh[1]):
+            for k in range(sh[2]):
+                toimage[j][k][i] = ndarr[i][j][k]
+    # exit()
+    im = Image.fromarray(toimage, "RGB")
+    im.save(root + "/" + str(id) + ".png")
+    # vutils.save_image(mask, 'test_mask.png', nrow=nrow, normalize=True, padding=0)
 
 def main():
-    dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_val"
+    # dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/dining_room/d_val"
     # dataroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/test128'
+    dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/disparityTest"
     batchSize = 1
     inputSize = 256
     channel = 3
@@ -59,11 +148,17 @@ def main():
                                    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                                ]))
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batchSize,
-                                             shuffle=True, num_workers=3, drop_last=True)
+                                             shuffle=False, num_workers=3, drop_last=True)
 
     #load mask
     # mask = randomMask(inputSize, batchSize, channel)
-    mask = getMask(inputSize,batchSize,channel)
+    # mask = getMask(inputSize,batchSize, channel,
+    #                maskroot="/home/cad/PycharmProjects/ContextEncoder/checkerMask6.png")
+    masklist = getMaskList(inputSize, batchSize, channel)
+
+
+    #load images
+    imglist = getImageList(inputSize, batchSize, channel)
 
     # load model
     uModel = MASKNET(inputSize, inputSize, channel, nfeature=32, downTimes=5)
@@ -110,11 +205,17 @@ def main():
     except OSError:
         pass
 
-    mask_gpu = Variable(mask).cuda()
-
     for i, data in enumerate(dataloader, 0):
 
+        if 1:
+            mask = masklist[i]
+            mask_gpu = Variable(mask).cuda()
+
         img_data, _ = data
+
+        if 1:
+            img_data = imglist[i]
+
         img_target = img_data.clone()
         img_target = Variable(img_target)
         img_data = initData(img_data, mask)
@@ -146,6 +247,7 @@ def main():
             loss_ad_list.append(loss_ad.data.mean())
 
         img_real = img_target.clone()
+        img_masked = img_data.clone()
         img_fake = output.clone()
 
         # record every epoch
@@ -154,10 +256,14 @@ def main():
             vutils.save_image(img_real.data,
                               'output/test_%d_real.png' % (i),
                               nrow=nrow, normalize=True)
+            vutils.save_image(img_masked.data,
+                              'output/test_%d_masked.png' % (i),
+                              nrow=nrow, normalize=True)
             vutils.save_image(img_fake.data,
                               'output/test_%d_fake.png' % (i),
                               nrow=nrow, normalize=True)
 
+        # vutils.save_image(img_fake.data, "result256/" + str(i) + ".png", normalize=True)
     if 1:
         fig, (ax0, ax1, ax2) = plt.subplots(ncols=3, figsize=(30, 10))
         ax0.plot(loss_img_list, label="$loss_img$")

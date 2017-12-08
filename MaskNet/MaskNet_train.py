@@ -33,6 +33,34 @@ def randomMask(fineSize, batchSize, nc):
 
     return m
 
+def getMaskList(fineSize, batchSize, nc):
+    from os import listdir
+    from os.path import isfile, join
+
+    # folder = "masks256"
+    folder = "allMasks"
+    onlyfiles = [join(folder, f) for f in listdir(folder) if isfile(join(folder, f))]
+
+    masklist = []
+    for srcf in onlyfiles:
+        mask = cv2.imread(srcf, cv2.IMREAD_GRAYSCALE)
+        if mask.shape != fineSize:
+            mask = cv2.resize(mask, fineSize)
+
+        mask = torch.from_numpy(mask)
+        mask = (mask == 255)
+
+        mask = mask.type(torch.FloatTensor)
+        m = torch.FloatTensor(batchSize, nc, fineSize[0], fineSize[1])
+
+        for i in range(batchSize):
+            m[i, 0, :, :] = mask
+            m[i, 1, :, :] = mask
+            m[i, 2, :, :] = mask
+
+        masklist.append(m)
+
+    return masklist
 
 def initData(img, mask):
     img = img * mask
@@ -52,7 +80,9 @@ def main():
     dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/clustermix/train"
     # dataroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/test128'
     batchSize = 16
-    inputSize = 256
+    # inputSize = 256
+    width = 640
+    height = 480
     channel = 3
     learningrate = 0.0001
     ngpu = 2
@@ -60,8 +90,9 @@ def main():
     # load data
     dataset = dset.ImageFolder(root=dataroot,
                                transform=transforms.Compose([
-                                   transforms.Scale(inputSize),
-                                   transforms.CenterCrop(inputSize),
+                                   transforms.Scale((height, width)),
+                                   # transforms.Scale(inputSize),
+                                   transforms.CenterCrop((height, width)),
                                    transforms.ToTensor(),
                                    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                                ]))
@@ -69,10 +100,11 @@ def main():
                                              shuffle=True, num_workers=3, drop_last=True)
 
     #load mask for the first time
-    mask = randomMask(inputSize, batchSize, channel)
+    # mask = randomMask(inputSize, batchSize, channel)
+    masklist = getMaskList((height, width), batchSize, channel)
 
     # load model
-    uModel = MASKNET(inputSize, inputSize, channel, nfeature=32, downTimes=5)
+    uModel = MASKNET(height, width, channel, nfeature=32, downTimes=5, stride=3)
     uModel.apply(weights_init)
     if ngpu:
         uModel = uModel.cuda()
@@ -81,7 +113,7 @@ def main():
         NetUroot = "checkpoints/Umodel_90.pth"
         uModel.load_state_dict(torch.load(NetUroot))
 
-    dModel = MASKDNET(batch=batchSize, nc=channel, inputSize=inputSize, nf=32)
+    dModel = MASKDNET(batch=batchSize, nc=channel, width=width, height=height, nf=32)
     dModel.apply(weights_init)
     if ngpu:
         dModel = dModel.cuda()
@@ -129,8 +161,8 @@ def main():
 
     iter_times = 21
 
-    changeMaskCnt = 0
-    mask_gpu = Variable(mask).cuda()
+    # changeMaskCnt = 0
+    # mask_gpu = Variable(mask).cuda()
 
     for epoch in range(iter_times):
         epochD = []
@@ -138,10 +170,14 @@ def main():
 
         for i, data in enumerate(dataloader, 0):
 
-            changeMaskCnt = changeMaskCnt + 1
-            if changeMaskCnt % 50 == 0:
-                mask = randomMask(inputSize, batchSize, channel)
-                mask_gpu = Variable(mask).cuda()
+            # changeMaskCnt = changeMaskCnt + 1
+            # if changeMaskCnt % 50 == 0:
+            #     mask = randomMask(inputSize, batchSize, channel)
+            #     mask_gpu = Variable(mask).cuda()
+            x = np.random.randint(0, len(masklist))
+            mask = masklist[x]
+            mask_gpu = Variable(mask).cuda()
+
 
             img_data, _ = data
             img_target = img_data.clone()
@@ -219,6 +255,9 @@ def main():
             if i == 0:
                     img_real = img_target.clone()
                     img_fake = output.clone()
+
+            # if i > 10:
+            #     break
 
         # record every epoch
         if 1:
