@@ -46,19 +46,20 @@ def getMaskList(fineSize, batchSize, nc):
         mask = cv2.imread(srcf, cv2.IMREAD_GRAYSCALE)
         if mask.shape != fineSize:
             mask = cv2.resize(mask, fineSize)
+            print("change mask size")
 
         mask = torch.from_numpy(mask)
         mask = (mask == 255)
 
         mask = mask.type(torch.FloatTensor)
-        m = torch.FloatTensor(batchSize, nc, fineSize[0], fineSize[1])
+        # m = torch.FloatTensor(batchSize, nc, fineSize[0], fineSize[1])
 
-        for i in range(batchSize):
-            m[i, 0, :, :] = mask
-            m[i, 1, :, :] = mask
-            m[i, 2, :, :] = mask
+        # for i in range(batchSize):
+        #     m[i, 0, :, :] = mask
+        #     m[i, 1, :, :] = mask
+        #     m[i, 2, :, :] = mask
 
-        masklist.append(m)
+        masklist.append(mask)
 
     return masklist
 
@@ -76,10 +77,16 @@ def weights_init(m):
         m.weight.data.normal_(1.0, 0.01)
         m.bias.data.fill_(0)
 
+def fillBatchMask(maskUsed, oneChannel):
+    for i in range(len(maskUsed)):
+        for j in range(len(maskUsed[i])):
+            maskUsed[i][j] = oneChannel
+    return maskUsed
+
 def main():
     dataroot = "/home/cad/PycharmProjects/ContextEncoder/dataset/clustermix/train"
     # dataroot = '/home/cad/PycharmProjects/ContextEncoder/dataset/test128'
-    batchSize = 16
+    batchSize = 8
     # inputSize = 256
     width = 640
     height = 480
@@ -90,7 +97,7 @@ def main():
     # load data
     dataset = dset.ImageFolder(root=dataroot,
                                transform=transforms.Compose([
-                                   transforms.Scale((height, width)),
+                                   transforms.Scale(min(height, width)),
                                    # transforms.Scale(inputSize),
                                    transforms.CenterCrop((height, width)),
                                    transforms.ToTensor(),
@@ -102,6 +109,7 @@ def main():
     #load mask for the first time
     # mask = randomMask(inputSize, batchSize, channel)
     masklist = getMaskList((height, width), batchSize, channel)
+    maskinUse = torch.FloatTensor(batchSize, channel, height, width)
 
     # load model
     uModel = MASKNET(height, width, channel, nfeature=32, downTimes=5, stride=3)
@@ -159,7 +167,7 @@ def main():
     except OSError:
         pass
 
-    iter_times = 21
+    iter_times = 11
 
     # changeMaskCnt = 0
     # mask_gpu = Variable(mask).cuda()
@@ -176,13 +184,14 @@ def main():
             #     mask_gpu = Variable(mask).cuda()
             x = np.random.randint(0, len(masklist))
             mask = masklist[x]
-            mask_gpu = Variable(mask).cuda()
+            maskinUse = fillBatchMask(maskinUse, mask)
+            mask_gpu = Variable(maskinUse).cuda()
 
 
             img_data, _ = data
             img_target = img_data.clone()
             img_target = Variable(img_target)
-            img_data = initData(img_data, mask)
+            img_data = initData(img_data, maskinUse)
             img_data = Variable(img_data)
             if ngpu:
                 img_data = img_data.cuda()
@@ -307,7 +316,7 @@ def main():
             plt.savefig("loss_D_detail.png", dpi=200)
             plt.close(fig)
 
-        if epoch % 5 == 0:
+        if epoch % 2 == 0:
             torch.save(uModel.state_dict(), 'checkpoints/Umodel_' + str(epoch) + '.pth')
             torch.save(dModel.state_dict(), 'checkpoints/dModel_' + str(epoch) + '.pth')
 

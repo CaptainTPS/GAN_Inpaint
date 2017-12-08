@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import array
 
 import torch.nn as nn
 import torch
@@ -24,10 +25,11 @@ class MASKNET(nn.Module):
 
         self.pooling = nn.ModuleList()
         sizeRecord = []
-        sizeCurr = [width, height]
+        sizeCurr = [height, width]
         for i in range(downTimes):
-            sizeRecord.append(sizeCurr)
-            sizeCurr = int(sizeCurr / stride)
+            sizeRecord.append(list(sizeCurr))
+            sizeCurr[0] = int(sizeCurr[0] / stride)
+            sizeCurr[1] = int(sizeCurr[1] / stride)
             temp = nn.Sequential(
                 nn.Conv2d(nfeature, nfeature, (stride, stride), stride=stride),
                 # nn.MaxPool2d(kernel_size=(2, 2)),
@@ -46,10 +48,11 @@ class MASKNET(nn.Module):
         for i in range(downTimes):
             nextSize = sizeRecord[-1]
             sizeRecord.pop(-1)
-            sizeCurr = sizeCurr * stride
+            sizeCurr[0] = sizeCurr[0] * stride
+            sizeCurr[1] = sizeCurr[1] * stride
             temp = nn.ModuleList()
             temp.append(nn.Sequential(
-                nn.ConvTranspose2d(nfeature,nfeature, (stride, stride), stride=stride, output_padding=nextSize-sizeCurr),
+                nn.ConvTranspose2d(nfeature,nfeature, (stride, stride), stride=stride, output_padding=(nextSize[0]-sizeCurr[0],nextSize[1]-sizeCurr[1])),
                 # nn.UpsamplingNearest2d(scale_factor=2),
                 nn.Conv2d(in_channels=nfeature, out_channels=nfeature / 2, kernel_size=(3, 3), padding=1),
                 nn.BatchNorm2d(nfeature / 2),
@@ -106,11 +109,19 @@ class MASKDNET(nn.Module):
         # input batch * nc * inputSize * inputSize
         self.batch = batch
         n = min(width, height)
+        m = max(width, height)
+        nextConv = None
+        if height > width:
+            nextConv = (2, 1)
+        elif width > height:
+            nextConv = (1, 2)
+
         self.net = nn.Sequential(
             nn.Conv2d(nc * 2, nf, 4, 2, 1),
             nn.LeakyReLU(0.2, True)
         )
         n = int(n / 2)
+        m = int(m / 2)
         feature = nf
         # batch * nf * inputSize * inputSize
         while n > 1:
@@ -119,6 +130,12 @@ class MASKDNET(nn.Module):
             self.net.add_module(str(len(self.net._modules)), nn.LeakyReLU(0.2, True))
             feature = feature * 2
             n = int(n / 2)
+            m = int(m / 2)
+        while m > 1:
+            self.net.add_module(str(len(self.net._modules)), nn.Conv2d(feature, feature, nextConv, nextConv))
+            self.net.add_module(str(len(self.net._modules)), nn.BatchNorm2d(feature))
+            self.net.add_module(str(len(self.net._modules)), nn.LeakyReLU(0.2, True))
+            m = int(m / 2)
         # batch * feature x 1 x 1
         self.net.add_module(str(len(self.net._modules)), nn.Conv2d(feature, 1, 1, 1))
         self.net.add_module(str(len(self.net._modules)), nn.Sigmoid())
