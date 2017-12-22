@@ -104,10 +104,9 @@ class MASKNET(nn.Module):
         return result
 
 class MASKDNET(nn.Module):
-    def __init__(self, batch, nc, width, height, nf):
+    def __init__(self, nc, width, height, nf):
         super(MASKDNET, self).__init__()
         # input batch * nc * inputSize * inputSize
-        self.batch = batch
         n = min(width, height)
         m = max(width, height)
         nextConv = None
@@ -117,7 +116,8 @@ class MASKDNET(nn.Module):
             nextConv = (1, 2)
 
         self.net = nn.Sequential(
-            nn.Conv2d(nc * 2, nf, 4, 2, 1),
+            # nn.Conv2d(nc * 2, nf, 4, 2, 1),
+            nn.Conv2d(nc, nf, 4, 2, 1),
             nn.LeakyReLU(0.2, True)
         )
         n = int(n / 2)
@@ -145,9 +145,9 @@ class MASKDNET(nn.Module):
         # because view() cannot be distributed, just make net distributed
         self.net = nn.DataParallel(self.net)
 
-    def forward(self, input, mask):
-        input = torch.cat((input, mask), dim=1)
+    def forward(self, input, mask, batch):
+        # input = torch.cat((input, mask), dim=1)
         output = self.net(input)
-        output = output.view(self.batch)
+        output = output.view(batch)
         return output
         pass
